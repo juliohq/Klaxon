@@ -107,28 +107,29 @@ func _physics_process(delta):
 		):
 		die()
 		return
-
-	if (roll != 0 and speed != 0 and pce.r_rate != 0):
+	var orbit_radius = orbit_radius()
+	if (roll != 0 and speed != 0 and orbit_radius != null and orbit_radius <= 100000):
 		var orbit = to_global(get_orbit())
-		var orbit_radius = orbit_radius()
 		var dist = speed * delta
 		var angle_add = 2.0 * PI * roll * dist / pce.r_circumference
-		var current_angle = global_rotation # equivalent to (global_position-orbit).angle()
+		var current_angle = (global_position-orbit).angle()
 		var current_pos = orbit + Vector2.RIGHT.rotated(current_angle) * orbit_radius
 		var final_angle = current_angle + angle_add
-		var direction = Vector2(cos(final_angle), sin(final_angle))
-		var final_pos = orbit + direction  * orbit_radius
+		var final_pos = orbit + Vector2.RIGHT.rotated(final_angle) * orbit_radius
+		# Used to ensure that our angle relative to orbit is fairly accurate,
+		# since that's what our position is treated as when orbiting
+		acceptable_levels(current_pos.distance_to(global_position), 0.005, "Orbit bounceback")
 		global_position = final_pos
 		if(pce.r_rate > 0):
 			rotate(pce.r_rate * roll * delta)
 		if(!course_altered):
-#			print(to_global(get_orbit()) - orbit) 
-			assert (to_global(get_orbit()).is_equal_approx(orbit),\
-			 "%s != %s" %  [to_global(get_orbit()), orbit])
+			acceptable_levels (to_global(get_orbit()).distance_to(orbit), 0.005, "Random orbit movement")
+			pass
 	else:
+		var e = global_position
+		global_position += Vector2(speed*delta, 0).rotated(rotation)
 		if(pce.r_rate > 0):
 			rotate(pce.r_rate * roll * delta)
-		var _x = move_and_collide(Vector2(0, speed*delta))
 		
 	
 
@@ -145,7 +146,7 @@ func _physics_process(delta):
 			
 	var time_string = "none" if pce.r_time < 0 else "%.1f" % pce.r_time
 	$"../UI/BottomText".text = \
-	("spd: %.0f, rtime: %s, rrad: %.0f, roll: %.1f %s" % \
+	("spd: %.0f, rtime: %s, rrad: %.0f, roll: %.2f %s" % \
 		[speed, time_string, pce.r_radius, roll, "A" if auto_level else ""])	
 		
 	course_altered = false
@@ -156,6 +157,10 @@ func _input(event):
 
 func _process(_delta):
 	update()
+
+func acceptable_levels(x, top, name, bottom = 0):
+	if(x < bottom or x > top):
+		print("!!!Warning!!! %s is at unacceptable levels: %s" % [name, x])
 
 func _draw():
 	if(draw_points.size() > 0):
@@ -174,10 +179,10 @@ func _draw():
 
 # the point that this unit will orbit around if untouched
 func get_orbit() -> Vector2:
-	return Vector2(-orbit_radius(), 0)
+	return Vector2(0, pce.r_radius / roll)
 
 func orbit_radius():
-	return pce.r_radius / roll
+	return null if roll == 0 else abs(pce.r_radius / roll)
 
 func die():
 	if controller == Controller.PLAYER:

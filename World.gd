@@ -36,6 +36,14 @@ func _input(event):
 	if event.is_action_pressed('toggle_cli'):
 		toggle_console()
 		get_tree().set_input_as_handled()
+	if (event.is_action_pressed("follow_player_toggle")):
+		if($"/root/Globals".current_camera == $"/root/Globals".free_camera):
+			$"/root/Globals".player_camera.make_current()
+		else:
+			assert($"/root/Globals".current_camera == $"/root/Globals".player_camera)
+			$"/root/Globals".free_camera.make_current()
+			$"/root/Globals".free_camera.global_position = $"/root/Globals".player_camera.global_position
+		
 
 func toggle_console():
 	if(cli_activated):
@@ -44,4 +52,3 @@ func toggle_console():
 	else:
 		cli_activated = true
 		$UI/CLI.grab_focus()
-		

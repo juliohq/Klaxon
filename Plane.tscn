@@ -9,7 +9,7 @@ script = ExtResource( 1 )
 orbit_color = Color( 0.74902, 0.74902, 0.74902, 1 )
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
-polygon = PoolVector2Array( 0, 100, -50, 0, 50, 0 )
+polygon = PoolVector2Array( 0, 50, 0, -59, 100, 0 )
 
 [node name="ExplosionArea" type="Area2D" parent="."]
 collision_layer = 2147483648
