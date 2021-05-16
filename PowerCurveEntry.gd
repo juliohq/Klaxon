@@ -17,6 +17,7 @@ func set_rate(x):
 	r_time = (2.0*PI) / x if r_rate != 0 else -1
 	r_circumference = r_time * speed
 	r_radius = r_circumference / (2.0*PI)
+#	print(speed, ",    ", r_rate, ",    ", r_time, ",    ", r_circumference, ",    ", r_radius)
 
 func set_time(time):
 	set_rate ((2.0*PI) / time if time != -1 else 0)
