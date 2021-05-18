@@ -4,12 +4,20 @@
 
 [sub_resource type="CircleShape2D" id=1]
 
-[node name="Plane" type="KinematicBody2D"]
+[node name="Bullet" type="KinematicBody2D"]
+collision_layer = 2147483648
+collision_mask = 0
 script = ExtResource( 1 )
+controller = 1
+target_collision_tags = [ 0 ]
+points_color = Color( 1, 0.211765, 0, 1 )
 orbit_color = Color( 0.74902, 0.74902, 0.74902, 1 )
+effective_range = 1000
+_explosion_radius = 1
+speed = 50
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
-polygon = PoolVector2Array( 0, 50, 0, -50, 100, 0 )
+polygon = PoolVector2Array( 0, 10, 0, -10, 50, 0 )
 
 [node name="ExplosionArea" type="Area2D" parent="."]
 collision_layer = 2147483648

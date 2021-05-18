@@ -1,7 +1,7 @@
 var speed : float
-var r_rate : float setget set_rate
-var r_time : float setget set_time
-var r_radius : float setget set_radius
+var r_rate setget set_rate
+var r_time setget set_time
+var r_radius setget set_radius
 var r_circumference : float setget set_circumference
 
 

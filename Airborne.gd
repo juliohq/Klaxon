@@ -2,13 +2,12 @@ extends KinematicBody2D
 const PCE = preload("PowerCurveEntry.gd")
 
 enum Controller {PLAYER, DUMB}
-export var controller = Controller.PLAYER
+export(Controller) var controller = Controller.PLAYER
 
-enum CollisionTags {AIR, GROUND}
+enum CollisionTags {AIR = 11, GROUND = 12}
 export(Array, CollisionTags) var collision_tags = []
 export(Array, CollisionTags) var target_collision_tags = []
 
-export var draw_points = PoolVector2Array([])
 export var points_color = Color.blue
 export var trail_length = 0
 export var trail_color = Color.gray
@@ -21,9 +20,10 @@ export var team = 0
 export var roll_time = 2.0
 
 export var health = -1
-export var _explosion_radius = -1
+export var _explosion_radius = 0
 export var auto_detonate = false
 
+onready var draw_points = $CollisionPolygon2D.polygon
 
 # purely for export/init, built into the below variable then never used
 # [speed, turntime]
@@ -36,9 +36,9 @@ export(Array, Array, int) var _power_curve = [
 # array of PCEs constructed from the above
 var power_curve = []
 var pce : PCE # current speed and turn data
-var speed setget set_speed
+export var speed = 0 setget set_speed
 
-var remaining_range = effective_range
+onready var remaining_range = effective_range
 var course_altered = false
 
 
@@ -50,8 +50,7 @@ var trail = []
 func _ready():
 	for x in _power_curve:
 		power_curve.append(PCE.new(x[0], x[1]))
-	pce = power_curve[0]
-	speed = pce.speed
+	set_speed(speed)
 	$ExplosionArea/Collision.shape.radius = _explosion_radius
 	for tag in collision_tags:
 		set_collision_layer_bit(tag, true)
@@ -65,6 +64,9 @@ func min_speed():
 	return power_curve[0].speed
 
 func set_speed(x):
+	if (power_curve == []):
+		speed = x
+		return
 	x = clamp(x, min_speed(), max_speed())
 	speed = x
 	if(power_curve[0].speed >= x):
@@ -100,18 +102,14 @@ func _physics_process(delta):
 					else:
 						roll = clamp(roll - delta/roll_time, 0, 1.0)
 					course_altered = true
+		Controller.DUMB:
+			print(speed)
 	
-	if( 
-		(speed*delta > remaining_range and remaining_range != -1)
-		or ($ExplosionArea.get_overlapping_bodies().size() > 1 and auto_detonate)
-		):
-		die()
-		return
+	var move = speed*delta if remaining_range == -1 else min(remaining_range, speed*delta) 
 	var orbit_radius = orbit_radius()
-	if (roll != 0 and speed != 0 and orbit_radius != null and orbit_radius <= 100000):
+	if (roll != 0 and speed != 0 and orbit_radius != -1 and orbit_radius <= 100000):
 		var orbit = to_global(get_orbit())
-		var dist = speed * delta
-		var angle_add = 2.0 * PI * roll * dist / pce.r_circumference
+		var angle_add = 2.0 * PI * roll * move / pce.r_circumference
 		var current_angle = (global_position-orbit).angle()
 		var current_pos = orbit + Vector2.RIGHT.rotated(current_angle) * orbit_radius
 		var final_angle = current_angle + angle_add
@@ -126,28 +124,32 @@ func _physics_process(delta):
 			acceptable_levels (to_global(get_orbit()).distance_to(orbit), 0.005, "Random orbit movement")
 			pass
 	else:
-		var e = global_position
-		global_position += Vector2(speed*delta, 0).rotated(rotation)
+		global_position += Vector2(move, 0).rotated(rotation)
 		if(pce.r_rate > 0):
 			rotate(pce.r_rate * roll * delta)
-		
-	
-
 	
 	
 	if(remaining_range != -1):
-		remaining_range -= speed*delta
+		remaining_range -= move
+		assert(remaining_range > 0)
+		if( 
+		(remaining_range == 0)
+		or (targets_in_explosion_range().size() > 0 and auto_detonate)
+		):
+			die()
+			return
 	
 	
 	if(trail_length > 0):
 		trail.append(global_position)
 		if(trail.size() > trail_length):
 			trail.pop_front()
-			
-	var time_string = "none" if pce.r_time < 0 else "%.1f" % pce.r_time
-	$"../UI/BottomText".text = \
-	("spd: %.0f, rtime: %s, rrad: %.0f, roll: %.2f %s" % \
-		[speed, time_string, pce.r_radius, roll, "A" if auto_level else ""])	
+	
+	if(controller == Controller.PLAYER):
+		var time_string = "none" if pce.r_time < 0 else "%.1f" % pce.r_time
+		$"../UI/BottomText".text = \
+		("spd: %.0f, rtime: %s, rrad: %.0f, roll: %.2f %s" % \
+			[speed, time_string, pce.r_radius, roll, "A" if auto_level else ""])	
 		
 	course_altered = false
 
@@ -182,9 +184,17 @@ func get_orbit() -> Vector2:
 	return Vector2(0, pce.r_radius / roll)
 
 func orbit_radius():
-	return null if roll == 0 else abs(pce.r_radius / roll)
+	return -1.0 if roll == 0.0 else abs(pce.r_radius / roll)
 
 func die():
 	if controller == Controller.PLAYER:
 		$"../UI/BottomText".text = "You are dead."
+	print(targets_in_explosion_range())
 	queue_free()
+
+func targets_in_explosion_range():
+	var ret = $ExplosionArea.get_overlapping_bodies() 
+	var x = ret.find(self)
+	if(x != -1):
+		ret.remove(x)
+	return ret
