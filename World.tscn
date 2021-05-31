@@ -15,12 +15,13 @@ position = Vector2( 208, 92 )
 script = ExtResource( 2 )
 
 [node name="Plane" parent="." instance=ExtResource( 1 )]
+controller = 0
 points_color = Color( 0.160784, 0.352941, 0.713726, 1 )
 trail_length = 180
 trail_color = Color( 0.74902, 0.74902, 0.74902, 0.121569 )
 orbit_size = 8
 orbit_color = Color( 0.74902, 0.74902, 0.74902, 0.129412 )
-effective_range = 5000
+roll_time = 0.001
 
 [node name="FollowCamera" type="Camera2D" parent="Plane"]
 zoom = Vector2( 5, 5 )
@@ -59,7 +60,6 @@ zoom = Vector2( 5, 5 )
 script = ExtResource( 4 )
 
 [node name="Bullet" parent="." instance=ExtResource( 5 )]
-position = Vector2( 681.235, 3.17838 )
-rotation = 3.14159
-collision_layer = 2147483649
-collision_mask = 1
+controller = 1001
+roll_time = 0.001
+_power_curve = [ [ 0, 1.0 ], [ 1000.0, 1.0 ] ]

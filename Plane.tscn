@@ -6,7 +6,11 @@
 
 [node name="Plane" type="KinematicBody2D"]
 script = ExtResource( 1 )
+collision_tags = [ 0 ]
 orbit_color = Color( 0.74902, 0.74902, 0.74902, 1 )
+acceleration = 300
+deceleration = 300
+_power_curve = [ [ 0, -1 ], [ 250, 4 ], [ 2500, 3 ] ]
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
 polygon = PoolVector2Array( 0, 50, 0, -50, 100, 0 )
