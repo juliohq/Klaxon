@@ -60,6 +60,9 @@ zoom = Vector2( 5, 5 )
 script = ExtResource( 4 )
 
 [node name="Bullet" parent="." instance=ExtResource( 5 )]
+position = Vector2( -300, 0 )
 controller = 1001
+effective_range = 5000
 roll_time = 0.001
-_power_curve = [ [ 0, 1.0 ], [ 1000.0, 1.0 ] ]
+_explosion_radius = 0
+speed = 300

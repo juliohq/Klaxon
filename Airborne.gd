@@ -68,6 +68,7 @@ func _ready():
 		set_collision_layer_bit(tag, true)
 	for tag in target_collision_tags:
 		$ExplosionArea.set_collision_mask_bit(tag, true)
+	$ExplosionArea.add_child($CollisionPolygon2D.duplicate())
 
 func max_speed():
 	return power_curve[power_curve.size()-1].speed
