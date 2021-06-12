@@ -4,14 +4,13 @@
 [ext_resource path="res://World.gd" type="Script" id=2]
 [ext_resource path="res://FollowPlayerCamera.gd" type="Script" id=3]
 [ext_resource path="res://FreeCamera.gd" type="Script" id=4]
-[ext_resource path="res://Bullet.tscn" type="PackedScene" id=5]
+[ext_resource path="res://Gun.gd" type="Script" id=5]
 
 [sub_resource type="StyleBoxEmpty" id=1]
 
 [sub_resource type="StyleBoxEmpty" id=2]
 
 [node name="World" type="Node2D"]
-position = Vector2( 208, 92 )
 script = ExtResource( 2 )
 
 [node name="Plane" parent="." instance=ExtResource( 1 )]
@@ -26,6 +25,27 @@ roll_time = 0.001
 [node name="FollowCamera" type="Camera2D" parent="Plane"]
 zoom = Vector2( 5, 5 )
 script = ExtResource( 3 )
+
+[node name="Gun" type="Node2D" parent="Plane"]
+position = Vector2( -100, 0 )
+script = ExtResource( 5 )
+fire_key = 49
+
+[node name="Bullet" parent="Plane/Gun" instance_placeholder="res://Bullet.tscn"]
+controller = 1001
+effective_range = 5000
+roll_time = 0.001
+_explosion_radius = 0
+speed = 10
+
+[node name="Gun2" type="Node2D" parent="Plane"]
+script = ExtResource( 5 )
+
+[node name="Bullet" parent="Plane/Gun2" instance_placeholder="res://Bullet.tscn"]
+controller = 1001
+effective_range = 5000
+roll_time = 0.001
+_explosion_radius = 0
 
 [node name="UI" type="CanvasLayer" parent="."]
 
@@ -58,11 +78,3 @@ __meta__ = {
 current = true
 zoom = Vector2( 5, 5 )
 script = ExtResource( 4 )
-
-[node name="Bullet" parent="." instance=ExtResource( 5 )]
-position = Vector2( -300, 0 )
-controller = 1001
-effective_range = 5000
-roll_time = 0.001
-_explosion_radius = 0
-speed = 300
