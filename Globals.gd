@@ -5,4 +5,4 @@ onready var pdelta = 1.0/pfps
 var player_camera = null
 var free_camera = null
 var current_camera = null
-var player = null
+var players = [null, null]

@@ -1,5 +1,9 @@
 extends KinematicBody2D
+onready var Globals = $"/root/Globals"
 const PCE = preload("PowerCurveEntry.gd")
+
+
+export var team = 0
 
 enum Controller {PLAYER, DUMB, PURSUIT_MK_I = 1001}
 export(Controller) var controller = 1 setget set_controller
@@ -8,10 +12,13 @@ func set_controller(x):
 	if not is_inside_tree():
 		yield(self, "ready")
 	if(x == Controller.PLAYER):
-		assert($"/root/Globals".player == null or $"/root/Globals".player == self, $"/root/Globals".player)
-		$"/root/Globals".player = self
-	else:
-		assert ($"/root/Globals".player != self)
+		assert(Globals.players[team] == null or Globals.players[team] == self, Globals.players[team])
+		Globals.players[team] = self
+
+# may be position node or vector, use get_target_pos() to access position/node as position
+onready var _target = Globals.players[0 if team == 1 else 1] if is_pursuit() else null 
+# will rotate to face the given direction not position
+var rotate_to_vector = false 
 
 func is_pursuit():
 	return controller / 1000 == 1
@@ -28,14 +35,14 @@ export var orbit_color = Color.gray
 export var acceleration = 100
 export var deceleration = 100
 export var effective_range = -1
-export var team = 0
 export var roll_time = 2.0
 
 export var health = -1
 export var _explosion_radius = 0
 export var auto_detonate = false
 
-onready var draw_points = $CollisionPolygon2D.polygon
+onready var collision_draw_points = $CollisionPolygon2D.polygon
+export var draw_collision = true
 
 # purely for export/init, built into the below variable then never used
 # [speed, turntime]
@@ -100,44 +107,47 @@ func _physics_process(delta):
 				if Input.is_action_pressed('accelerate'):
 					set_speed(speed + acceleration * delta)
 					course_altered = true
+					_target = null
 				if Input.is_action_pressed('decelerate'):
 					set_speed(speed - deceleration * delta)
 					course_altered = true
+					_target = null
 				if Input.is_action_pressed('turn_left'):
 					roll = clamp(roll - delta/roll_time, -1.0, 1.0)
 					course_altered = true
+					_target = null
 				elif Input.is_action_pressed('turn_right'):
 					roll = clamp(roll + delta/roll_time, -1.0, 1.0)
 					course_altered = true
+					_target = null
+				elif get_target_pos() != null:
+					if(rotate_to_vector):
+						_basic_pursuit(delta, self.transform.basis_xform_inv(get_target_pos()))
+					else:
+						_basic_pursuit(delta,to_local(get_target_pos()))
 				elif auto_level: 
 					if(roll < 0):
 						roll = clamp(roll  + delta/roll_time, -1.0, 0)
 					else:
 						roll = clamp(roll - delta/roll_time, 0, 1.0)
 					course_altered = true
+					_target = null
 		Controller.DUMB:
 			pass
 		Controller.PURSUIT_MK_I:
-			var player = $"/root/Globals".player
-			if(player != null):
-				var y = to_local(player.global_position).y
-				print(y)
-				if y < 0.1:
-					roll = clamp(roll - delta/roll_time, -1.0, 1.0)
-					course_altered = true
-				elif y > 0.1:
-					roll = clamp(roll + delta/roll_time, -1.0, 1.0)
-					course_altered = true
+			_basic_pursuit(delta, to_local(get_target_pos()))
 	
 	
 	var move = move_prediction(delta)
-
-	var upper = abs(to_local($"/root/Globals".player.global_position).angle()) 
 	
 	global_position = move[0]
-	rotation += move[1] if not is_pursuit() \
-		else clamp(move[1], 0, upper) if move[1] >= 0 \
-		else clamp(move[1], -upper, 0)
+	if not is_pursuit():
+		rotation += move[1] 
+	else:
+		var pos = get_target_pos()
+		if pos:
+			var upper = abs(to_local(pos).angle())  
+			rotation += clamp(move[1], 0, upper) if move[1] >= 0 else clamp(move[1], -upper, 0)
 	
 	
 	if(effective_range >= 0):
@@ -161,9 +171,24 @@ func _physics_process(delta):
 		
 	course_altered = false
 
+func _basic_pursuit(delta, l_pos):
+	if l_pos:
+		if l_pos.y < 0.1:
+			roll = clamp(roll - delta/roll_time, -1.0, 1.0)
+			course_altered = true
+		elif l_pos.y > 0.1:
+			roll = clamp(roll + delta/roll_time, -1.0, 1.0)
+			course_altered = true
+
 func _input(event):
 	if event.is_action_pressed("reset_roll"):
 		auto_level = not auto_level
+	if event.is_action_pressed("l_click"):
+		_target = get_global_mouse_position()
+		rotate_to_vector = false
+	if event.is_action_pressed("r_click"):
+		_target = get_global_mouse_position() - global_position
+		rotate_to_vector = true
 
 func _process(_delta):
 	update()
@@ -173,8 +198,8 @@ func acceptable_levels(x, top, name, bottom = 0):
 		print("!!!Warning!!! %s is at unacceptable levels: %s" % [name, x])
 
 func _draw():
-	if(draw_points.size() > 0):
-		draw_polyline(draw_points + PoolVector2Array([draw_points[0]]), points_color)
+	if(draw_collision and collision_draw_points.size() > 0):
+		draw_polyline(collision_draw_points + PoolVector2Array([collision_draw_points[0]]), points_color)
 
 	if trail_length > 0 and trail.size() >= 2:
 		var trail_draw = []
@@ -183,7 +208,7 @@ func _draw():
 			pass
 		draw_polyline(trail_draw, trail_color)
 
-	if(abs(roll) >= 0.01 and orbit_size > 0):
+	if(abs(roll) >= 0.01 and pce.r_radius > 0 and orbit_size > 0):
 		# print(to_global(get_orbit()))
 		draw_circle(get_orbit(), orbit_size, orbit_color)
 
@@ -198,10 +223,23 @@ func die(explode = true):
 	if controller == Controller.PLAYER:
 		$"../UI/BottomText".text = "You are dead."
 	if explode:
-		print("%s is exploding, hitting these targets: %s" % [self, targets_in_explosion_range()])
+#		print("%s is exploding, hitting these targets: %s" % [self, targets_in_explosion_range()])
+		pass
 	else:
-		print("%s is dying peacefully" % self)
-	queue_free()
+#		print("%s is dying peacefully" % self)
+		pass
+	if $Death != null:
+		set_physics_process(false)
+		collision_draw_points = []
+		$Death.visible = true
+		$Death.playing = true
+		for x in collision_tags:
+			set_collision_layer_bit(x, false)
+		for x in target_collision_tags:
+			set_collision_mask_bit(x, false)
+	else:
+		queue_free()
+	
 
 func targets_in_explosion_range():
 	var ret = $ExplosionArea.get_overlapping_bodies() 
@@ -230,6 +268,13 @@ func move_prediction(delta, _roll = self.roll):
 		acceptable_levels(current_pos.distance_to(global_position), 0.005, "Orbit bounceback")
 		if(!course_altered):
 			acceptable_levels (to_global(get_orbit(_roll)).distance_to(orbit), 0.005, "Random orbit movement")
-		return [final_pos, rot]
+		return [final_pos, rot]	
 	else:
 		return [global_position + Vector2(move, 0).rotated(rotation), rot]
+
+
+func _on_DeathAnim_animation_finished():
+	queue_free()
+
+func get_target_pos():
+	return _target.global_position if _target is Node else _target
