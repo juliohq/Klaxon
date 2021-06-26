@@ -1,4 +1,7 @@
 extends Node2D
+# Projectiles must have the load as placeholder box checked and placed 1 per gun. 
+# They can be fired any number of times, with any custom attributes! Transform is on the gun.
+
 
 enum Keys {NOTHING = -1, ONE=49, TWO=50, THREE=51, FOUR=52, FIVE=53}
 export(Keys) var fire_key

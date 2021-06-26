@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://Bullet.tscn" type="PackedScene" id=1]
+
+[node name="Bomb" instance=ExtResource( 1 )]
+draw_explosion_prediction = true
+effective_range = 100
+roll_time = -1.0
+_explosion_radius = 50
+
+[node name="CollisionPolygon2D" parent="." index="0"]
+polygon = PoolVector2Array( 0, 30, 0, -30, 30, 0 )

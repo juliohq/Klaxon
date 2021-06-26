@@ -7,6 +7,7 @@
 [node name="Plane" type="KinematicBody2D"]
 script = ExtResource( 1 )
 collision_tags = [ 0 ]
+_collision_poly_color = Color( 1, 0, 0, 0.25098 )
 orbit_color = Color( 0.74902, 0.74902, 0.74902, 1 )
 acceleration = 300
 deceleration = 300

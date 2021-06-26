@@ -27,11 +27,22 @@ enum CollisionTags {AIR = 11, GROUND = 12}
 export(Array, CollisionTags) var collision_tags = []
 export(Array, CollisionTags) var target_collision_tags = []
 
-export var points_color = Color.blue
+export var collision_line_color = Color.red
+export var collision_line_width = 1.0
+export var _collision_poly_color = Color(1, 0, 0, 0.25)
+var collision_poly_color = PoolColorArray([_collision_poly_color])
 export var trail_length = 0
+export var  trail_width = 0
 export var trail_color = Color.gray
 export var orbit_size =  0
 export var orbit_color = Color.gray
+onready var collision_draw_points = $CollisionPolygon2D.polygon
+export var draw_collision = true
+export var draw_explosion_prediction = false
+export var explosion_prediction_ring_color = Color.blue
+export var explosion_prediction_circle_color = Color(0, 0, 1, 0.25)
+export var explosion_prediction_ring_width = 1.0
+
 export var acceleration = 100
 export var deceleration = 100
 export var effective_range = -1
@@ -41,8 +52,7 @@ export var health = -1
 export var _explosion_radius = 0
 export var auto_detonate = false
 
-onready var collision_draw_points = $CollisionPolygon2D.polygon
-export var draw_collision = true
+
 
 # purely for export/init, built into the below variable then never used
 # [speed, turntime]
@@ -113,32 +123,32 @@ func _physics_process(delta):
 					course_altered = true
 					_target = null
 				if Input.is_action_pressed('turn_left'):
-					roll = clamp(roll - delta/roll_time, -1.0, 1.0)
+					roll = clamp(roll - delta/roll_time, -1.0, 1.0) if roll_time != -1 else 0
 					course_altered = true
 					_target = null
 				elif Input.is_action_pressed('turn_right'):
-					roll = clamp(roll + delta/roll_time, -1.0, 1.0)
+					roll = clamp(roll + delta/roll_time, -1.0, 1.0) if roll_time != -1 else 0
 					course_altered = true
 					_target = null
 				elif get_target_pos() != null:
 					if(rotate_to_vector):
-						_basic_pursuit(delta, self.transform.basis_xform_inv(get_target_pos()))
+						_basic_pursuit(delta, get_target_pos())
 					else:
-						_basic_pursuit(delta,to_local(get_target_pos()))
+						_basic_pursuit(delta,get_target_pos())
 				elif auto_level: 
 					if(roll < 0):
-						roll = clamp(roll  + delta/roll_time, -1.0, 0)
+						roll = clamp(roll  + delta/roll_time, -1.0, 0) if roll_time != -1 else 0
 					else:
-						roll = clamp(roll - delta/roll_time, 0, 1.0)
+						roll = clamp(roll - delta/roll_time, 0, 1.0) if roll_time != -1 else 0
 					course_altered = true
 					_target = null
 		Controller.DUMB:
 			pass
 		Controller.PURSUIT_MK_I:
-			_basic_pursuit(delta, to_local(get_target_pos()))
+			_basic_pursuit(delta, get_target_pos())
 	
 	
-	var move = move_prediction(delta)
+	var move = calculate_movement(delta)
 	
 	global_position = move[0]
 	if not is_pursuit():
@@ -171,14 +181,16 @@ func _physics_process(delta):
 		
 	course_altered = false
 
-func _basic_pursuit(delta, l_pos):
-	if l_pos:
-		if l_pos.y < 0.1:
-			roll = clamp(roll - delta/roll_time, -1.0, 1.0)
-			course_altered = true
-		elif l_pos.y > 0.1:
-			roll = clamp(roll + delta/roll_time, -1.0, 1.0)
-			course_altered = true
+# roll a the appropriate rate to face the target directly ASAP
+func _basic_pursuit(delta, g_pos):
+	assert(roll_time != -1)
+	var angle = get_angle_to(g_pos) / (2 * PI)
+	# for desired roll, angle = roll_time * roll * roll / 2 
+	# since roll_time * roll / 2 is the amount of time spent rolling at max decel
+	# thus roll_time * roll * roll / 2 is the time travelled at max decel
+	# thus roll = sqrt(angle/roll_time) * 2
+	var desired_roll = sqrt(abs(angle/roll_time)) * (2 if angle >= 0 else -2) # * overshoot if you want to lead the target perhaps
+	roll = clamp(desired_roll, max(-1.0, roll - delta / roll_time), min(1.0, roll + delta / roll_time))
 
 func _input(event):
 	if event.is_action_pressed("reset_roll"):
@@ -199,18 +211,30 @@ func acceptable_levels(x, top, name, bottom = 0):
 
 func _draw():
 	if(draw_collision and collision_draw_points.size() > 0):
-		draw_polyline(collision_draw_points + PoolVector2Array([collision_draw_points[0]]), points_color)
+		var to_draw = collision_draw_points + PoolVector2Array([collision_draw_points[0]])
+		draw_polyline(to_draw, collision_line_color, collision_line_width)
+		draw_polygon(to_draw, collision_poly_color)
 
 	if trail_length > 0 and trail.size() >= 2:
 		var trail_draw = []
 		for point in trail:
 			trail_draw.append(to_local(point))
 			pass
-		draw_polyline(trail_draw, trail_color)
+		draw_polyline(trail_draw, trail_color, trail_width)
 
 	if(abs(roll) >= 0.01 and pce.r_radius > 0 and orbit_size > 0):
 		# print(to_global(get_orbit()))
 		draw_circle(get_orbit(), orbit_size, orbit_color)
+	
+	if(draw_explosion_prediction):
+		var explosion_prediction_pos = to_local(calculate_movement(remaining_range/speed)[0])
+		draw_circle(explosion_prediction_pos, 
+			$ExplosionArea/Collision.shape.radius*(1.0-(remaining_range/effective_range)),
+			explosion_prediction_circle_color)
+		draw_arc(explosion_prediction_pos, $ExplosionArea/Collision.shape.radius, 0, 2*PI, 32, 
+		explosion_prediction_ring_color, explosion_prediction_ring_width)
+	
+	
 
 # the point that this unit will orbit around if untouched
 func get_orbit(_roll = self.roll) -> Vector2:
@@ -247,12 +271,13 @@ func targets_in_explosion_range():
 	if(x != -1):
 		ret.remove(x)
 	return ret
-#
 
+# used for calculating circular movement and not just prediction for the user
 # list of locals: speed, global_position
 # list of vars: delta, roll
 # list of var-derived: remaining_range, orbit_radius, orbit
-func move_prediction(delta, _roll = self.roll):
+# returns [final global position, rotation]
+func calculate_movement(delta, _roll = self.roll):
 	var rot = pce.r_rate * _roll * delta if pce.r_rate > 0.0 else 0.0
 	var move = speed*delta if effective_range < 0 else min(remaining_range, speed*delta) 
 	var orbit_radius = orbit_radius(_roll)
@@ -271,6 +296,8 @@ func move_prediction(delta, _roll = self.roll):
 		return [final_pos, rot]	
 	else:
 		return [global_position + Vector2(move, 0).rotated(rotation), rot]
+
+
 
 
 func _on_DeathAnim_animation_finished():
