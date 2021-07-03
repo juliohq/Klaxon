@@ -14,8 +14,10 @@
 script = ExtResource( 2 )
 
 [node name="Plane" parent="." instance=ExtResource( 1 )]
+collision_layer = 1
 team = 1
 controller = 0
+collision_tags = [  ]
 trail_length = 180
 trail_color = Color( 0.74902, 0.74902, 0.74902, 0.121569 )
 orbit_size = 8

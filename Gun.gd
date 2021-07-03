@@ -16,7 +16,6 @@ func fire():
 	var kids = self.get_children()
 	assert(kids.size() == 1)
 	var only_child = kids[0]
-	var child_transform
 	var instance = only_child.create_instance()
 	instance.transform = self.global_transform
 	self.remove_child(instance)

@@ -3,7 +3,8 @@
 [ext_resource path="res://Airborne.gd" type="Script" id=1]
 [ext_resource path="res://assets/explosion/spritesheet.png" type="Texture" id=2]
 
-[sub_resource type="CircleShape2D" id=1]
+[sub_resource type="CircleShape2D" id=67]
+radius = 100.0
 
 [sub_resource type="AtlasTexture" id=2]
 flags = 4
@@ -338,24 +339,19 @@ collision_layer = 2147483648
 collision_mask = 0
 script = ExtResource( 1 )
 controller = 2
-target_collision_tags = [ 0 ]
 orbit_color = Color( 0.74902, 0.74902, 0.74902, 1 )
 roll_time = 0.5
-_explosion_radius = 1
 auto_detonate = true
-_power_curve = [ [ 0, 10.0 ], [ 1000.0, 10.0 ] ]
-speed = 50
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
 polygon = PoolVector2Array( 0, 10, 0, -10, 50, 0 )
 
 [node name="ExplosionArea" type="Area2D" parent="."]
 collision_layer = 2147483648
-collision_mask = 0
 
 [node name="Collision" type="CollisionShape2D" parent="ExplosionArea"]
 visible = false
-shape = SubResource( 1 )
+shape = SubResource( 67 )
 
 [node name="Death" type="AnimatedSprite" parent="."]
 visible = false

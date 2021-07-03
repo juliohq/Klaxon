@@ -1,4 +1,5 @@
 extends KinematicBody2D
+
 onready var Globals = $"/root/Globals"
 const PCE = preload("PowerCurveEntry.gd")
 
@@ -24,8 +25,16 @@ func is_pursuit():
 	return controller / 1000 == 1
 
 enum CollisionTags {AIR = 11, GROUND = 12}
-export(Array, CollisionTags) var collision_tags = []
-export(Array, CollisionTags) var target_collision_tags = []
+export(Array, CollisionTags) var collision_tags = [] setget set_collision_tags
+func set_collision_tags(x):
+	for tag in CollisionTags.values():
+		set_collision_layer_bit(tag, tag in x)
+	collision_tags = x
+export(Array, CollisionTags) var target_collision_tags = [] setget set_target_collision_tags
+func set_target_collision_tags(x):
+	for tag in CollisionTags.values():
+		$ExplosionArea.set_collision_mask_bit(tag, tag in x)
+	target_collision_tags = x
 
 export var collision_line_color = Color.red
 export var collision_line_width = 1.0
@@ -49,8 +58,13 @@ export var effective_range = -1
 export var roll_time = 2.0
 
 export var health = -1
-export var _explosion_radius = 0
+export var explosion_radius = 0 setget set_explosion_radius
+func set_explosion_radius(x : int):
+	$ExplosionArea/Collision.shape.radius = x
+	explosion_radius = x
 export var auto_detonate = false
+
+var dying = false
 
 
 
@@ -77,40 +91,16 @@ var auto_level = false
 var trail = []
 
 func _ready():
+	if(Engine.editor_hint):
+		return
 	for x in _power_curve:
 		power_curve.append(PCE.new(x[0], x[1]))
 	set_speed(speed)
-	$ExplosionArea/Collision.shape.radius = _explosion_radius
-	for tag in collision_tags:
-		set_collision_layer_bit(tag, true)
-	for tag in target_collision_tags:
-		$ExplosionArea.set_collision_mask_bit(tag, true)
 	$ExplosionArea.add_child($CollisionPolygon2D.duplicate())
 
-func max_speed():
-	return power_curve[power_curve.size()-1].speed
-
-func min_speed():
-	return power_curve[0].speed
-
-func set_speed(x):
-	if (power_curve == []):
-		speed = x
-		return
-	x = clamp(x, min_speed(), max_speed())
-	speed = x
-	if(power_curve[0].speed >= x):
-		pce = power_curve[0]
-		return
-	for i in range(1, power_curve.size()):
-		if power_curve[i].speed >= x:
-			pce = power_curve[i-1].interpolate_by_speed(x, power_curve[i])
-			return
-	assert(false, "This line should not be reachable")
-
-
-
 func _physics_process(delta):
+	if(Engine.editor_hint):
+		return
 	match(controller):
 		Controller.PLAYER:
 			if !$"../".cli_activated:
@@ -123,11 +113,11 @@ func _physics_process(delta):
 					course_altered = true
 					_target = null
 				if Input.is_action_pressed('turn_left'):
-					roll = clamp(roll - delta/roll_time, -1.0, 1.0) if roll_time != -1 else 0
+					roll = clamp(roll - delta/roll_time, -1.0, 1.0) if roll_time != -1 else 0.0
 					course_altered = true
 					_target = null
 				elif Input.is_action_pressed('turn_right'):
-					roll = clamp(roll + delta/roll_time, -1.0, 1.0) if roll_time != -1 else 0
+					roll = clamp(roll + delta/roll_time, -1.0, 1.0) if roll_time != -1 else 0.0
 					course_altered = true
 					_target = null
 				elif get_target_pos() != null:
@@ -137,9 +127,9 @@ func _physics_process(delta):
 						_basic_pursuit(delta,get_target_pos())
 				elif auto_level: 
 					if(roll < 0):
-						roll = clamp(roll  + delta/roll_time, -1.0, 0) if roll_time != -1 else 0
+						roll = clamp(roll  + delta/roll_time, -1.0, 0) if roll_time != -1 else 0.0
 					else:
-						roll = clamp(roll - delta/roll_time, 0, 1.0) if roll_time != -1 else 0
+						roll = clamp(roll - delta/roll_time, 0, 1.0) if roll_time != -1 else 0.0
 					course_altered = true
 					_target = null
 		Controller.DUMB:
@@ -181,35 +171,14 @@ func _physics_process(delta):
 		
 	course_altered = false
 
-# roll a the appropriate rate to face the target directly ASAP
-func _basic_pursuit(delta, g_pos):
-	assert(roll_time != -1)
-	var angle = get_angle_to(g_pos) / (2 * PI)
-	# for desired roll, angle = roll_time * roll * roll / 2 
-	# since roll_time * roll / 2 is the amount of time spent rolling at max decel
-	# thus roll_time * roll * roll / 2 is the time travelled at max decel
-	# thus roll = sqrt(angle/roll_time) * 2
-	var desired_roll = sqrt(abs(angle/roll_time)) * (2 if angle >= 0 else -2) # * overshoot if you want to lead the target perhaps
-	roll = clamp(desired_roll, max(-1.0, roll - delta / roll_time), min(1.0, roll + delta / roll_time))
-
-func _input(event):
-	if event.is_action_pressed("reset_roll"):
-		auto_level = not auto_level
-	if event.is_action_pressed("l_click"):
-		_target = get_global_mouse_position()
-		rotate_to_vector = false
-	if event.is_action_pressed("r_click"):
-		_target = get_global_mouse_position() - global_position
-		rotate_to_vector = true
-
 func _process(_delta):
+	if(Engine.editor_hint):
+		return
 	update()
 
-func acceptable_levels(x, top, name, bottom = 0):
-	if(x < bottom or x > top):
-		print("!!!Warning!!! %s is at unacceptable levels: %s" % [name, x])
-
 func _draw():
+	if(Engine.editor_hint):
+		return
 	if(draw_collision and collision_draw_points.size() > 0):
 		var to_draw = collision_draw_points + PoolVector2Array([collision_draw_points[0]])
 		draw_polyline(to_draw, collision_line_color, collision_line_width)
@@ -226,13 +195,68 @@ func _draw():
 		# print(to_global(get_orbit()))
 		draw_circle(get_orbit(), orbit_size, orbit_color)
 	
-	if(draw_explosion_prediction):
+	if(draw_explosion_prediction and not dying and speed != 0):
 		var explosion_prediction_pos = to_local(calculate_movement(remaining_range/speed)[0])
+		+$ExplosionArea.position.rotated(rotation)
+		print($ExplosionArea/Collision.shape.radius)
 		draw_circle(explosion_prediction_pos, 
 			$ExplosionArea/Collision.shape.radius*(1.0-(remaining_range/effective_range)),
 			explosion_prediction_circle_color)
 		draw_arc(explosion_prediction_pos, $ExplosionArea/Collision.shape.radius, 0, 2*PI, 32, 
 		explosion_prediction_ring_color, explosion_prediction_ring_width)
+
+func _input(event):
+	if event.is_action_pressed("reset_roll"):
+		auto_level = not auto_level
+	if event.is_action_pressed("l_click"):
+		_target = get_global_mouse_position()
+		rotate_to_vector = false
+	if event.is_action_pressed("r_click"):
+		_target = get_global_mouse_position() - global_position
+		rotate_to_vector = true
+
+func _on_DeathAnim_animation_finished():
+	if(Engine.editor_hint):
+		return
+	queue_free()
+
+func max_speed():
+	return power_curve[power_curve.size()-1].speed
+
+func min_speed():
+	return power_curve[0].speed
+
+func set_speed(x):
+	if (power_curve == []):
+		speed = x
+		return
+	x = clamp(x, min_speed(), max_speed())
+	speed = x
+	if(power_curve[0].speed >= x):
+		pce = power_curve[0]
+		return
+	for i in range(1, power_curve.size()):
+		if power_curve[i].speed >= x:
+			pce = power_curve[i-1].interpolate_by_speed(x, power_curve[i])
+			return
+	assert(false, "This line should not be reachable")
+
+# roll a the appropriate rate to face the target directly ASAP
+func _basic_pursuit(delta, g_pos):
+	assert(roll_time != -1)
+	var angle = get_angle_to(g_pos) / (2 * PI)
+	# for desired roll, angle = roll_time * roll * roll / 2 
+	# since roll_time * roll / 2 is the amount of time spent rolling at max decel
+	# thus roll_time * roll * roll / 2 is the time travelled at max decel
+	# thus roll = sqrt(angle/roll_time) * 2
+	var desired_roll = sqrt(abs(angle/roll_time)) * (2 if angle >= 0 else -2) # * overshoot if you want to lead the target perhaps
+	roll = clamp(desired_roll, max(-1.0, roll - delta / roll_time), min(1.0, roll + delta / roll_time))
+
+
+
+func acceptable_levels(x, top, name, bottom = 0):
+	if(x < bottom or x > top):
+		print("!!!Warning!!! %s is at unacceptable levels: %s" % [name, x])
 	
 	
 
@@ -247,8 +271,7 @@ func die(explode = true):
 	if controller == Controller.PLAYER:
 		$"../UI/BottomText".text = "You are dead."
 	if explode:
-#		print("%s is exploding, hitting these targets: %s" % [self, targets_in_explosion_range()])
-		pass
+		print("%s is exploding, hitting these targets: %s" % [self, targets_in_explosion_range()])
 	else:
 #		print("%s is dying peacefully" % self)
 		pass
@@ -257,6 +280,7 @@ func die(explode = true):
 		collision_draw_points = []
 		$Death.visible = true
 		$Death.playing = true
+		dying = true
 		for x in collision_tags:
 			set_collision_layer_bit(x, false)
 		for x in target_collision_tags:
@@ -296,12 +320,6 @@ func calculate_movement(delta, _roll = self.roll):
 		return [final_pos, rot]	
 	else:
 		return [global_position + Vector2(move, 0).rotated(rotation), rot]
-
-
-
-
-func _on_DeathAnim_animation_finished():
-	queue_free()
 
 func get_target_pos():
 	return _target.global_position if _target is Node else _target
