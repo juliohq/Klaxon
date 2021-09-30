@@ -6,19 +6,14 @@
 radius = 100.0
 
 [node name="Bomb" instance=ExtResource( 1 )]
-target_collision_tags = [  ]
 draw_explosion_prediction = true
 effective_range = 100
 roll_time = -1.0
 explosion_radius = 100
-_power_curve = [ [ 0, -1 ], [ 250, 4 ], [ 500, 3 ], [ 1000, 0.1 ] ]
-speed = 0
+speed = 50
 
 [node name="CollisionPolygon2D" parent="." index="0"]
 polygon = PoolVector2Array( 0, 30, 0, -30, 30, 0 )
-
-[node name="ExplosionArea" parent="." index="1"]
-collision_mask = 1
 
 [node name="Collision" parent="ExplosionArea" index="0"]
 visible = true
