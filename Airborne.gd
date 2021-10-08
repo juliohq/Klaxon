@@ -1,26 +1,30 @@
 extends KinematicBody2D
 
-onready var G = $"/root/Globals"
+var G # set on _enter_tree(), which is before _ready() and before all nodes are in the tree
 const PCE = preload("PowerCurveEntry.gd")
 
 
 export var team = 0
 
 enum Controller {PLAYER, DUMB, PURSUIT_MK_I = 1001}
-export(Controller) var controller = 1 setget set_controller
+export(Controller) var controller = 1
+var is_player # set on _enter_tree(), which is before _ready() and before all nodes are in the tree
 func set_controller(x):
+	print(x)
 	controller = x
-	if not is_inside_tree():
-		yield(self, "ready")
+	is_player = controller == Controller.PLAYER
 	if(x == Controller.PLAYER):
 		assert(G.players[team] == null or G.players[team] == self, G.players[team])
 		G.players[team] = self
 
+
 # may be position node or vector, use get_target_pos() to access position/node as position
-onready var _target = G.players[0 if team == 1 else 1] if is_pursuit() else null 
+# set on _ready()
+var _target = null
 
 func is_pursuit():
 	return controller / 1000 == 1
+	
 
 enum CollisionTags {AIR = 11, GROUND = 12}
 export(Array, CollisionTags) var collision_tags = [] setget set_collision_tags
@@ -53,7 +57,6 @@ export var explosion_prediction_ring_width = 1.0
 export var acceleration = 100
 export var deceleration = 100
 export var effective_range = -1
-export var roll_time = 2.0
 
 export var health = -1
 export var explosion_radius = 0 setget set_explosion_radius
@@ -87,6 +90,12 @@ var course_altered = false
 onready var roll = G.Roll.STRAIGHT
 var trail = []
 
+func _enter_tree():
+	print("hi")
+	G = $"/root/Globals"
+	set_controller(controller)
+	
+
 func _ready():
 	for x in _power_curve:
 		power_curve.append(PCE.new(x[0], x[1]))
@@ -95,6 +104,10 @@ func _ready():
 	set_target_collision_tags(target_collision_tags)
 	set_explosion_radius(explosion_radius)
 	$ExplosionArea.add_child($CollisionPolygon2D.duplicate())
+	if is_pursuit():
+		var enemy_team = 0 if team == 1 else 1
+		_target = G.players[enemy_team]
+		assert(_target != null, "Could not find player on team %s." % enemy_team)
 
 func _physics_process(delta):
 	match(controller):
@@ -175,7 +188,6 @@ func _draw():
 	if(draw_explosion_prediction and not dying and speed != 0):
 		var explosion_prediction_pos = to_local(calculate_movement(remaining_range/speed)[0])
 		+$ExplosionArea.position.rotated(rotation)
-		print($ExplosionArea/Collision.shape.radius)
 		draw_circle(explosion_prediction_pos, 
 			$ExplosionArea/Collision.shape.radius*(1.0-(remaining_range/effective_range)),
 			explosion_prediction_circle_color)
@@ -264,13 +276,16 @@ func calculate_movement(delta, _roll = self.roll):
 		G.Roll.RIGHT:
 			_roll = 1
 		G.Roll.GUIDED:
-			_roll = get_angle_to(get_target_pos()) / (pce.r_rate * delta)
-			if _roll > 1: 
-				_roll = 1
-			elif _roll < -1: 
-				_roll = -1
-			else: 
-				_roll = 0 # no less than frame turning
+			if(pce.r_rate == 0):
+				roll = 0 # infinite turn time
+			else:
+				_roll = get_angle_to(get_target_pos()) / (pce.r_rate * delta)
+				if _roll > 1: 
+					_roll = 1
+				elif _roll < -1: 
+					_roll = -1
+				else: 
+					_roll = 0 # no less than frame turning
 	var rot = pce.r_rate * _roll * delta if pce.r_rate > 0.0 else 0.0
 	var move = speed*delta if effective_range < 0 else min(remaining_range, speed*delta) 
 	var orbit_radius = orbit_radius(_roll) if _roll != 0 else -1

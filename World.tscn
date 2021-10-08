@@ -15,14 +15,12 @@ script = ExtResource( 2 )
 
 [node name="Plane" parent="." instance=ExtResource( 1 )]
 collision_layer = 1
-team = 1
 controller = 0
 collision_tags = [  ]
 trail_length = 180
 trail_color = Color( 0.74902, 0.74902, 0.74902, 0.121569 )
 orbit_size = 8
 orbit_color = Color( 0.74902, 0.74902, 0.74902, 0.129412 )
-roll_time = 0.001
 
 [node name="FollowCamera" type="Camera2D" parent="Plane"]
 zoom = Vector2( 5, 5 )
@@ -30,9 +28,32 @@ script = ExtResource( 3 )
 
 [node name="Gun" parent="Plane" instance=ExtResource( 5 )]
 position = Vector2( -300, 0 )
+clip_reload = 0.0
 
 [node name="Bomb" parent="Plane/Gun" instance_placeholder="res://Bomb.tscn"]
-orbit_color = Color( 0.74902, 0.74902, 0.74902, 1 )
+
+[node name="Plane2" parent="." instance=ExtResource( 1 )]
+collision_layer = 1
+team = 1
+controller = 1001
+collision_tags = [  ]
+trail_length = 180
+trail_color = Color( 0.74902, 0.74902, 0.74902, 0.121569 )
+orbit_size = 8
+orbit_color = Color( 0.74902, 0.74902, 0.74902, 0.129412 )
+speed = 50
+
+[node name="FollowCamera" type="Camera2D" parent="Plane2"]
+zoom = Vector2( 5, 5 )
+script = ExtResource( 3 )
+
+[node name="Gun" parent="Plane2" instance=ExtResource( 5 )]
+position = Vector2( -300, 0 )
+clip_reload = 0.0
+ai_max_fire_range = 10000.0
+ai_max_fire_angle_degrees = 90.0
+
+[node name="Bomb" parent="Plane2/Gun" instance_placeholder="res://Bomb.tscn"]
 
 [node name="UI" type="CanvasLayer" parent="."]
 

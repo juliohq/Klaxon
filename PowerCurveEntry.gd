@@ -1,6 +1,6 @@
 var speed : float
-var r_rate setget set_rate
-var r_time setget set_time
+var r_rate setget set_rate # 0 = does not turn
+var r_time setget set_time # -1 = does not turn
 var r_radius setget set_radius
 var r_circumference : float setget set_circumference
 
