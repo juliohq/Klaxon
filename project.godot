@@ -16,12 +16,12 @@ _global_script_class_icons={
 [application]
 
 config/name="Klaxon"
-run/main_scene="res://World.tscn"
-config/icon="res://icon.png"
+run/main_scene="res://scenes/World.tscn"
+config/icon="res://resources/icon.png"
 
 [autoload]
 
-Globals="*res://Globals.gd"
+Globals="*res://scripts/nodeless/Globals.gd"
 
 [input]
 
@@ -102,4 +102,4 @@ common/physics_fps=120
 
 [rendering]
 
-environment/default_environment="res://default_env.tres"
+environment/default_environment="res://resources/default_env.tres"
