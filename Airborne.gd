@@ -10,7 +10,6 @@ enum Controller {PLAYER, DUMB, PURSUIT_MK_I = 1001}
 export(Controller) var controller = 1
 var is_player # set on _enter_tree(), which is before _ready() and before all nodes are in the tree
 func set_controller(x):
-	print(x)
 	controller = x
 	is_player = controller == Controller.PLAYER
 	if(x == Controller.PLAYER):
@@ -91,7 +90,6 @@ onready var roll = G.Roll.STRAIGHT
 var trail = []
 
 func _enter_tree():
-	print("hi")
 	G = $"/root/Globals"
 	set_controller(controller)
 	
@@ -237,7 +235,10 @@ func die(explode = true):
 	if controller == Controller.PLAYER:
 		$"../UI/BottomText".text = "You are dead."
 	if explode:
-		print("%s is exploding, hitting these targets: %s" % [self, targets_in_explosion_range()])
+		var targets = targets_in_explosion_range()
+		print("%s is exploding, " % [self] 
+			+ "hitting no targets." if targets == [] 
+			else "hitting these targets: %s." % [targets])
 	else:
 #		print("%s is dying peacefully" % self)
 		pass
