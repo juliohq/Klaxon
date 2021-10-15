@@ -30,9 +30,9 @@ func _ready():
 
 func _physics_process(delta):
 	if(current_ammo == 0 and max_ammo != -1):
-		clip_reload(delta)
+		reload_clip(delta)
 	elif(current_shot_reload > 0):
-		shot_reload(delta)
+		reload_shot(delta)
 	elif (get_parent().is_player):
 		if(single_click_for_full_burst):
 			if(Input.is_key_pressed(fire_key)):
@@ -40,18 +40,18 @@ func _physics_process(delta):
 			if(full_burst):
 				fire(delta)
 			else:
-				clip_reload(delta)
+				reload_clip(delta)
 		elif(Input.is_key_pressed(fire_key)):
 			fire(delta)
 		else:
-			clip_reload(delta)
+			reload_clip(delta)
 	elif(does_ai_want_to_fire()):
 			fire(delta)
 	else:
-			clip_reload(delta)
+			reload_clip(delta)
 
 # Team Fortress 2 style reloading, auto and can be cancelled anytime if our clip is not empty
-func clip_reload(delta):
+func reload_clip(delta):
 	if(current_ammo == 0):
 		full_burst = false  # our volley is over, wait for next click to repeat
 	current_clip_reload += delta
@@ -59,14 +59,14 @@ func clip_reload(delta):
 		current_clip_reload = 0
 		current_ammo = max_ammo
 
-func shot_reload(delta):
+func reload_shot(delta):
 	current_clip_reload = 0
 	current_shot_reload += delta
 	if(current_shot_reload >= shot_reload):
-		var to_clip_reload = current_shot_reload - shot_reload
+		var to_reload_clip = current_shot_reload - shot_reload
 		current_shot_reload = 0
 		# spend extra time reloading. PFPS is an integer so this should usually be neglible, but why not
-		clip_reload(to_clip_reload) 
+		reload_clip(to_reload_clip) 
 
 
 	
@@ -87,4 +87,4 @@ func fire(delta):
 	instance.transform = self.global_transform
 	self.remove_child(instance)
 	$"/root/World".add_child(instance)
-	shot_reload(delta)
+	reload_shot(delta)

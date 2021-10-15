@@ -186,7 +186,6 @@ func _draw():
 	
 	if(draw_explosion_prediction and not dying and speed != 0):
 		var explosion_prediction_pos = to_local(calculate_movement(remaining_range/speed)[0])
-		+$ExplosionArea.position.rotated(rotation)
 		draw_circle(explosion_prediction_pos, 
 			$ExplosionArea/Collision.shape.radius*(1.0-(remaining_range/effective_range)),
 			explosion_prediction_circle_color)
@@ -295,7 +294,7 @@ func calculate_movement(delta, _roll = self.roll):
 		var orbit = to_global(get_orbit(_roll))
 		var angle_add = 2.0 * PI * _roll * move / pce.r_circumference
 		var current_angle = (global_position-orbit).angle()
-		var current_pos = orbit + Vector2.RIGHT.rotated(current_angle) * orbit_radius
+#		var current_pos = orbit + Vector2.RIGHT.rotated(current_angle) * orbit_radius
 		var final_angle = current_angle + angle_add
 		var final_pos = orbit + Vector2.RIGHT.rotated(final_angle) * orbit_radius
 		return [final_pos, rot]	

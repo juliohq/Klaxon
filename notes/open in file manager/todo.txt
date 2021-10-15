@@ -10,7 +10,8 @@ At half range they will detect enemies instantly. This scales linearly in terms 
 Once detecteed, an enemy will undetect only once it leaves range. It will then do so instantly.
 
 Chaff will appear at radar/visual range or within its own AoE without modifiers. It will be ineffective once radar-detected.
-All aspects of radar power decrease if you are turning too much.
+All aspects of radar power decrease by a % if you are turning too much 
+	(for X seconds consecutively, subtracting each second, then decreasing linearly).
 Can direct radar, taking a few seconds to boost in 90 degree arc, at cost to own.
 
 	
