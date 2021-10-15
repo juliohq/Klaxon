@@ -24,9 +24,12 @@ onready var current_ammo : int = max_ammo
 var full_burst : bool = false
 
 func _ready():
+	
 	assert (not (single_click_for_full_burst and max_ammo == -1), 
 	"A single click firing a burst of infinite length is... less than ideal...")	
-	assert(self.get_children().size() == 1, "This gun fires nothing!")
+	assert(self.get_child_count() == 1, "Guns must have exactly one child.")
+	var child = self.get_child(0)
+	assert(child is InstancePlaceholder, "The child of a Gun should be an Airborne with Right-click -> Load as Placeholder enabled.")
 
 func _physics_process(delta):
 	if(current_ammo == 0 and max_ammo != -1):
