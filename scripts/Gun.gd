@@ -29,7 +29,7 @@ func _ready():
 	"A single click firing a burst of infinite length is... less than ideal...")	
 	assert(self.get_child_count() == 1, "Guns must have exactly one child.")
 	var child = self.get_child(0)
-	assert(child is InstancePlaceholder, "The child of a Gun should be an Airborne with Right-click -> Load as Placeholder enabled.")
+	assert(child is InstancePlaceholder, "The child of a Gun should be an InstancePlaceholder of the Airborne class. Right-click -> Load as Placeholder.")
 
 func _physics_process(delta):
 	if(current_ammo == 0 and max_ammo != -1):
