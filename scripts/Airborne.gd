@@ -7,7 +7,7 @@ const PCE = preload("nodeless/PowerCurveEntry.gd")
 
 export var team = 0
 
-enum Controller {PLAYER, DUMB, PURSUIT_MK_I = 1001}
+enum Controller {PLAYER, DUMB, PURSUE_NEAREST = 1001, PURSUE_PLAYER = 1002}
 export(Controller) var controller = 1
 var is_player # set on _enter_tree(), which is before _ready() and before all nodes are in the tree
 func set_controller(x):
@@ -86,9 +86,10 @@ onready var remaining_range : float = effective_range
 var course_altered = false
 
 
-
 onready var roll = G.Roll.STRAIGHT
 var trail = []
+
+onready var is_ammo = get_parent().get_script().get_path().get_file() == "Gun.gd"
 
 func _enter_tree():
 	G = $"/root/Globals"
@@ -103,10 +104,8 @@ func _ready():
 	set_target_collision_tags(target_collision_tags)
 	set_explosion_radius(explosion_radius)
 	$ExplosionArea.add_child($CollisionPolygon2D.duplicate())
-	if is_pursuit():
-		var enemy_team = 0 if team == 1 else 1
-		_target = G.players[enemy_team]
-		assert(_target != null, "Could not find player on team %s." % enemy_team)
+	if(is_ammo):
+		assert(get_parent().get_parent().team == team, "A gun fires a projectile of a different team.")
 
 func _physics_process(delta):
 	match(controller):
@@ -129,13 +128,17 @@ func _physics_process(delta):
 					course_altered = true
 					_target = null
 				elif get_target_pos() != null:
-							roll = G.Roll.GUIDED
+					roll = G.Roll.GUIDED
 				else:
 					roll = G.Roll.STRAIGHT
 		Controller.DUMB:
 			pass
-		Controller.PURSUIT_MK_I:
-				roll = G.Roll.GUIDED
+		Controller.PURSUE_NEAREST:
+			roll = G.Roll.GUIDED
+		Controller.PURSUE_PLAYER:
+			_target = G.players[get_enemy_team()]
+			assert(_target != null, "Could not find player on team %s." % get_enemy_team())
+			roll = G.Roll.GUIDED
 	
 	
 	var move = calculate_movement(delta)
@@ -167,6 +170,9 @@ func _physics_process(delta):
 
 func _process(_delta):
 	update()
+
+func get_enemy_team():
+	return 0 if team == 1 else 1
 
 func _draw():
 	if(draw_collision and collision_draw_points.size() > 0):
