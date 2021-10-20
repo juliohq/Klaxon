@@ -6,6 +6,7 @@ const MAX_ZOOM = 20 # higher zoom = more zoomed out
 const PAN_SPEED = 100
 
 var cli_activated = false
+onready var G = $"/root/Globals"
 
 func camera_input(delta, c):
 	var pan = PAN_SPEED * c.zoom.x * delta
@@ -28,7 +29,7 @@ func _zoom(i, c):
 	c.zoom.y = clamp(c.zoom.y + i, MIN_ZOOM, MAX_ZOOM)
 
 func _process(delta):
-	var c = $"/root/Globals".current_camera
+	var c = G.current_camera
 	if(c):
 		camera_input(delta, c)
 
@@ -37,12 +38,12 @@ func _input(event):
 		toggle_console()
 		get_tree().set_input_as_handled()
 	if (event.is_action_pressed("follow_player_toggle")):
-		if($"/root/Globals".current_camera == $"/root/Globals".free_camera):
-			$"/root/Globals".player_camera.make_current()
+		if(G.current_camera == G.free_camera):
+			G.player_camera.make_current()
 		else:
-			assert($"/root/Globals".current_camera == $"/root/Globals".player_camera)
-			$"/root/Globals".free_camera.make_current()
-			$"/root/Globals".free_camera.global_position = $"/root/Globals".player_camera.global_position
+			assert(G.current_camera == G.player_camera, "Current_camera should be player_camera %s but is instead %s." % [G.player_camera, G.current_camera])
+			G.free_camera.make_current()
+			G.free_camera.global_position = G.player_camera.global_position
 		
 
 func toggle_console():

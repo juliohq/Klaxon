@@ -90,6 +90,7 @@ onready var roll = G.Roll.STRAIGHT
 var trail = []
 
 onready var is_ammo = get_parent().get_script().get_path().get_file() == "Gun.gd"
+var auto_groups = ["Airborne"]
 
 func _enter_tree():
 	G = $"/root/Globals"
@@ -106,6 +107,8 @@ func _ready():
 	$ExplosionArea.add_child($CollisionPolygon2D.duplicate())
 	if(is_ammo):
 		assert(get_parent().get_parent().team == team, "A gun fires a projectile of a different team.")
+	for group in auto_groups:
+		add_to_group(group)
 
 func _physics_process(delta):
 	match(controller):
@@ -135,6 +138,19 @@ func _physics_process(delta):
 			pass
 		Controller.PURSUE_NEAREST:
 			roll = G.Roll.GUIDED
+			var nearest = null
+			var nearest_dist = null
+			for airborne in get_tree().get_nodes_in_group('Airborne'):
+				if airborne.team != team:
+					if(nearest == null):
+						nearest = airborne
+						nearest_dist = airborne.global_position.distance_to(global_position)
+					else:
+						var dist = airborne.global_position.distance_to(global_position)
+						if (dist < nearest_dist):
+							nearest = airborne
+							nearest_dist = dist
+			_target = nearest
 		Controller.PURSUE_PLAYER:
 			_target = G.players[get_enemy_team()]
 			assert(_target != null, "Could not find player on team %s." % get_enemy_team())

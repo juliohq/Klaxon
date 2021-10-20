@@ -78,7 +78,6 @@ func does_ai_want_to_fire():
 	var enemy_player = G.players[0 if get_parent().team != 0 else 1]
 	var enemy_range =  self.global_position.distance_to(enemy_player.global_position)
 	var enemy_angle = rad2deg(abs(global_position.direction_to(enemy_player.global_position).angle()))
-	print(enemy_angle)
 	return enemy_range >= ai_min_fire_range \
 		and enemy_range <= ai_max_fire_range \
 		and enemy_angle <= ai_max_fire_angle_degrees
