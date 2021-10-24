@@ -89,6 +89,25 @@ var course_altered = false
 onready var roll = G.Roll.STRAIGHT
 var trail = []
 
+export var max_range_detect_time = 10 #scales linearly to 0 at half range
+export var radar_range = 0.0
+export var visual_range = 0.0
+export var enemy_radar_flat_reduction = 0.0
+export var enemy_visual_percent_reduction = 0.0
+
+
+# export var r_rate_no_interference = -1.0
+# var _power_curve_no_interference # is this possible? since pces scale linearly by r_rate / speed
+# export var interference_time = 30.0
+# export var interference_safe_point = 0.75
+# export var jam_strength = 0.0 # enemy interference per second, if directinoal
+# export var jam_range = 500
+# var interference = 100.0
+#
+# export var radar_direction_change_time = 5.0
+# export var radar_direction_multiplier = 1.25
+
+
 onready var is_ammo = get_parent().get_script().get_path().get_file() == "Gun.gd"
 var auto_groups = ["Airborne"]
 
@@ -191,6 +210,8 @@ func get_enemy_team():
 	return 0 if team == 1 else 1
 
 func _draw():
+	if(not (self in G.visible_airbornes)):
+		return
 	if(draw_collision and collision_draw_points.size() > 0):
 		var to_draw = collision_draw_points + PoolVector2Array([collision_draw_points[0]])
 		draw_polyline(to_draw, collision_line_color, collision_line_width)
