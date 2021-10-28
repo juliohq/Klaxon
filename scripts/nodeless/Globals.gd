@@ -6,6 +6,7 @@ var player_camera = null
 var free_camera = null
 var current_camera = null
 var players = [null, null]
+var max_mean_detection_time = 1
 enum Roll {LEFT, STRAIGHT, RIGHT, GUIDED}
 func roll_to_int(roll):
 	assert(roll in [Roll.LEFT, Roll.STRAIGHT, Roll.RIGHT])
@@ -13,13 +14,13 @@ func roll_to_int(roll):
 	else 0 if roll == Roll.STRAIGHT \
 	else 1 # if roll == Roll.RIGHT
 
-var client_vision_team = -1 
+var client_vision_team = 0
 # -1 means show everything, positive numbers mean show only what that team's units see
-var visible_airbornes = []
+var visible_airbornes
+var team_count = 2
 func get_visible_airbornes(team = client_vision_team):
-
 	var airbornes =  get_tree().get_nodes_in_group("Airborne")
-	if client_vision_team == -1: 
+	if client_vision_team == -1:
 		return airbornes
 	var ret = []
 	for ally in airbornes:
@@ -28,13 +29,17 @@ func get_visible_airbornes(team = client_vision_team):
 				ret.append(ally)
 			for enemy in airbornes:
 				if(enemy.team != team and not (enemy in ret)):
-					var visible = enemy.global_position.distance_to(ally.global_position) #TODO
-					if(visible):
+					if(enemy in ally.tracked_enemies): 
 						ret.append(enemy)
 	return ret
+
+func mean_time_to_chance(time, delta):
+	return 1 / (time / delta)
 
 func _ready():
 	 process_priority = -100
 
 func _physics_process(delta):
-	visible_airbornes = get_visible_airbornes()
+	visible_airbornes = []
+	for i in range(0, team_count):
+		visible_airbornes.append(get_visible_airbornes(i))

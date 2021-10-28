@@ -89,12 +89,14 @@ var course_altered = false
 onready var roll = G.Roll.STRAIGHT
 var trail = []
 
-export var max_range_detect_time = 10 #scales linearly to 0 at half range
+export var max_range_detect_time = 10 # scales linearly to 0 at half range
 export var radar_range = 0.0
 export var visual_range = 0.0
 export var enemy_radar_flat_reduction = 0.0
 export var enemy_visual_percent_reduction = 0.0
-
+var tracked_enemies = []
+var tracking_enemies = [] # enemies that are tracking us
+export var is_decoy = false # always visible, and instantly destroyed when detected
 
 # export var r_rate_no_interference = -1.0
 # var _power_curve_no_interference # is this possible? since pces scale linearly by r_rate / speed
@@ -181,6 +183,7 @@ func _physics_process(delta):
 	global_position = move[0]
 	rotation += move[1]
 	
+	update_tracked_enemies(delta)
 	
 	if(effective_range >= 0):
 		remaining_range -= min(speed*delta, remaining_range)
@@ -209,8 +212,12 @@ func _process(_delta):
 func get_enemy_team():
 	return 0 if team == 1 else 1
 
+func is_visible_by_team(vision_team):
+	return true if (vision_team == team or vision_team == -1 or is_decoy) \
+		 else (self in G.visible_airbornes[vision_team])
+
 func _draw():
-	if(not (self in G.visible_airbornes)):
+	if not is_visible_by_team(G.client_vision_team):
 		return
 	if(draw_collision and collision_draw_points.size() > 0):
 		var to_draw = collision_draw_points + PoolVector2Array([collision_draw_points[0]])
@@ -234,6 +241,13 @@ func _draw():
 			explosion_prediction_circle_color)
 		draw_arc(explosion_prediction_pos, $ExplosionArea/Collision.shape.radius, 0, 2*PI, 32, 
 		explosion_prediction_ring_color, explosion_prediction_ring_width)
+	
+#	if(tracking_enemies != []):
+#		draw_circle(Vector2(500,0), 5, Color.red)
+#
+#	draw_circle(Vector2(0, 0), 500, Color(0,0,0,0.1))
+#	draw_circle(Vector2(0, 0), 250, Color(0,0,0,0.2))
+	
 
 func _input(event):
 	if event.is_action_pressed("l_click"):
@@ -305,6 +319,43 @@ func targets_in_explosion_range():
 	if(x != -1):
 		ret.remove(x)
 	return ret
+
+func update_tracked_enemies(delta):
+	for enemy in tracked_enemies:
+		if chance_to_see(enemy, delta) == 0:
+			tracked_enemies.erase(enemy)
+			enemy.tracking_enemies.erase(self)
+	var airbornes =  get_tree().get_nodes_in_group("Airborne")
+	for enemy in airbornes:
+		if(enemy.team != team and not (enemy in tracked_enemies)):
+			if(randf() <= chance_to_see(enemy, delta)):
+				if(enemy.is_decoy):
+					enemy.die(false)
+				else:
+					tracked_enemies.append(enemy)
+					enemy.tracking_enemies.append(self)
+
+
+func chance_to_see(enemy, delta):
+	var dist = enemy.global_position.distance_to(global_position)
+	
+	var visual = visual_range * (1 - (enemy.enemy_visual_percent_reduction/100))
+	var v_insta = visual / 2 # instant detection range
+	var visual_chance = 0.0 if visual < dist \
+		else 1 if v_insta >= dist \
+		else G.mean_time_to_chance(G.max_mean_detection_time * (dist / v_insta), delta)
+	
+	var radar = radar_range - enemy.enemy_radar_flat_reduction
+	var r_insta = radar / 2 # instant detection range
+	
+	var radar_chance = 0.0 if radar < dist \
+		else 1.0 if r_insta >= dist \
+		else G.mean_time_to_chance(G.max_mean_detection_time * (dist / r_insta), delta)
+#	if max(visual_chance, radar_chance) > 0:
+#		print("%s, %s, %s, %s" % [dist/v_insta if v_insta != 0 else "??", dist/r_insta if r_insta != 0 else "??", visual_chance, radar_chance])
+		
+	return max(visual_chance, radar_chance)
+	
 
 # used for calculating circular movement and not just prediction for the user
 # list of locals: speed, global_position

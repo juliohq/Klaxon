@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://resources/flare/flare_idle.tres" type="SpriteFrames" id=1]
+
+[node name="AnimatedSprite" type="AnimatedSprite"]
+position = Vector2( 117.466, 81.4253 )
+frames = ExtResource( 1 )
+frame = 2
+playing = true
