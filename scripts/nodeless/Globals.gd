@@ -39,7 +39,7 @@ func mean_time_to_chance(time, delta):
 func _ready():
 	 process_priority = -100
 
-func _physics_process(delta):
+func _physics_process(_delta):
 	visible_airbornes = []
 	for i in range(0, team_count):
 		visible_airbornes.append(get_visible_airbornes(i))

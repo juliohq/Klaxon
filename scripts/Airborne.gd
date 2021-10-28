@@ -299,11 +299,12 @@ func die(explode = true):
 	else:
 #		print("%s is dying peacefully" % self)
 		pass
-	if $Death != null:
+	var death = get_node_or_null("death")
+	if death != null:
 		set_physics_process(false)
 		collision_draw_points = []
-		$Death.visible = true
-		$Death.playing = true
+		death.visible = true
+		death.playing = true
 		dying = true
 		for x in collision_tags:
 			set_collision_layer_bit(x, false)
@@ -341,8 +342,8 @@ func chance_to_see(enemy, delta):
 	
 	var visual = visual_range * (1 - (enemy.enemy_visual_percent_reduction/100))
 	var v_insta = visual / 2 # instant detection range
-	var visual_chance = 0.0 if visual < dist \
-		else 1 if v_insta >= dist \
+	var visual_chance = 0.0 if (visual < dist) \
+		else 1.0 if (v_insta >= dist) \
 		else G.mean_time_to_chance(G.max_mean_detection_time * (dist / v_insta), delta)
 	
 	var radar = radar_range - enemy.enemy_radar_flat_reduction

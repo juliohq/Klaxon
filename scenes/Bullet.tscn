@@ -3,7 +3,6 @@
 [ext_resource path="res://scripts/Airborne.gd" type="Script" id=1]
 [ext_resource path="res://resources/explosion/spritesheet.png" type="Texture" id=2]
 
-
 [sub_resource type="CircleShape2D" id=1]
 radius = 100.0
 
@@ -357,4 +356,5 @@ shape = SubResource( 1 )
 visible = false
 frames = SubResource( 66 )
 speed_scale = 24.0
+
 [connection signal="animation_finished" from="Death" to="." method="_on_DeathAnim_animation_finished"]
