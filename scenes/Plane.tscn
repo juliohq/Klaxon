@@ -23,5 +23,3 @@ collision_mask = 0
 
 [node name="Collision" type="CollisionShape2D" parent="ExplosionArea"]
 shape = SubResource( 1 )
-
-[node name="Light2D" type="Light2D" parent="."]
