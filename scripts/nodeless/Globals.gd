@@ -1,7 +1,7 @@
 extends Node
 
-onready var pfps = ProjectSettings.get_setting("physics/common/physics_fps")
-onready var pdelta = 1.0/pfps
+@onready var pfps = ProjectSettings.get_setting("physics/common/physics_fps")
+@onready var pdelta = 1.0/pfps
 var player_camera = null
 var free_camera = null
 var current_camera = null
@@ -37,7 +37,7 @@ func mean_time_to_chance(time, delta):
 	return 1 / (time / delta)
 
 func _ready():
-	 process_priority = -100
+	process_priority = -100
 
 func _physics_process(_delta):
 	visible_airbornes = []

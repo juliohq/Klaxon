@@ -1,0 +1,4 @@
+res://scenes/Bullet.tscn
+res://scenes/World.tscn
+res://scripts/Airborne.gd
+res://scripts/draw_where_color.gdshader

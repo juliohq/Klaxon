@@ -18,8 +18,13 @@ There should be an icon showing that you are detected.
 Chaff will appear at radar/visual range or within its own AoE without modifiers. It will disappear once radar-detected. 
 ✔️
 
-CSG-polygon-style fog of war. White = insta-detect, light gray = any amount of non-insta-detect, dark gray = never detect
-
+Current plan is:
+No fog script/shader.
+Render Fog, then Aura, then Plane.
+Render plane only where Aura, as a shader.
+Set plane render priority to -1.
+(On Godot 4.0 they have uniform shaders so it should instead be do not render fog within visual distance.)
+✔️ confirmed this will work, though it is messy
 
 
 Interference increases if you don't cap your r_rate or the enemy jams you (directional radar only).

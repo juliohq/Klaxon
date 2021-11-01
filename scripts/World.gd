@@ -6,7 +6,7 @@ const MAX_ZOOM = 20 # higher zoom = more zoomed out
 const PAN_SPEED = 100
 
 var cli_activated = false
-onready var G = $"/root/Globals"
+@onready var G = $"/root/Globals"
 
 func camera_input(delta, c):
 	var pan = PAN_SPEED * c.zoom.x * delta
@@ -41,7 +41,7 @@ func _input(event):
 		if(G.current_camera == G.free_camera):
 			G.player_camera.make_current()
 		else:
-			assert(G.current_camera == G.player_camera, "Current_camera should be player_camera %s but is instead %s." % [G.player_camera, G.current_camera])
+			assert(G.current_camera == G.player_camera, "Current_camera should be player_camera but is not.")
 			G.free_camera.make_current()
 			G.free_camera.global_position = G.player_camera.global_position
 		

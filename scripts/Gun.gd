@@ -1,32 +1,31 @@
 extends Node2D
 
-onready var G = $"/root/Globals"
+@onready var G = $"/root/Globals"
 # Projectiles must have the load as placeholder box checked and placed 1 per gun. 
 # They can be fired any number of times, with any custom attributes! Transform is on the gun.
 
 # some successfully tested items: single click burst, overflow, cancelling, does_ai_want_to_fire()
  
 enum Keys {NOTHING = -1, ONE=49, TWO=50, THREE=51, FOUR=52, FIVE=53}
-export(Keys) var fire_key
-export(float) var clip_reload = 5
-export(float) var bullets_per_second = 5
-onready var shot_reload = 1/bullets_per_second
-export(float) var max_ammo = -1 # -1 = infinite
-export(bool) var single_click_for_full_burst = false
-export(float) var ai_min_fire_range = 0
-export(float) var ai_max_fire_range = 0
-export(float) var ai_max_fire_angle_degrees = 0
+@export var fire_key : Keys = Keys.ONE
+@export var clip_reload = 5.0
+@export var bullets_per_second = 5.0
+@onready var shot_reload = 1/bullets_per_second
+@export var max_ammo = -1 # -1 = infinite
+@export var single_click_for_full_burst = false
+@export var ai_min_fire_range = 0.0
+@export var ai_max_fire_range = 0.0
+@export var ai_max_fire_angle_degrees = 0.0
 
 var current_warmup : float = 0.0
 var current_shot_reload : float = 0.0
 var current_clip_reload : float = 0.0
-onready var current_ammo : int = max_ammo
+@onready var current_ammo : int = max_ammo
 var full_burst : bool = false
 
 func _ready():
 	
-	assert (not (single_click_for_full_burst and max_ammo == -1), 
-	"A single click firing a burst of infinite length is... less than ideal...")	
+	assert (not (single_click_for_full_burst and max_ammo == -1), "A single click firing a burst of infinite length is... less than ideal...")	
 	assert(get_child_count() == 1, "Guns must have exactly one child.")
 	var child = get_child(0)
 	assert(child is InstancePlaceholder, "The child of a Gun should be an InstancePlaceholder of the Airborne class. Right-click -> Load as Placeholder.")

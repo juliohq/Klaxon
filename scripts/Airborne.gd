@@ -1,20 +1,20 @@
-extends KinematicBody2D
+extends CharacterBody2D
 
 # in thise node specifically set on _enter_tree(), which is before _ready() and before all nodes are in the tree
 # this way it can be used onready
 var G 
 const PCE = preload("nodeless/PowerCurveEntry.gd")
 
-export var team = 0
+@export var team = 0
 
 enum Controller {PLAYER, DUMB, PURSUE_NEAREST = 1001, PURSUE_PLAYER = 1002}
-export(Controller) var controller = 1
+@export var controller : Controller = Controller.DUMB
 var is_player # set on _enter_tree(), which is before _ready() and before all nodes are in the tree
 func set_controller(x):
 	controller = x
 	is_player = controller == Controller.PLAYER
 	if(x == Controller.PLAYER):
-		assert(G.players[team] == null or G.players[team] == self, G.players[team])
+		assert(G.players[team] == null or G.players[team] == self, "Player isn't set in the player array")
 		G.players[team] = self
 
 
@@ -23,55 +23,56 @@ func set_controller(x):
 var _target = null
 
 func is_pursuit():
-	return controller / 1000 == 1
+	return controller in [Controller.PURSUE_NEAREST, Controller.PURSUE_PLAYER]
 	
 
 enum CollisionTags {AIR = 11, GROUND = 12}
-export(Array, CollisionTags) var collision_tags = [] setget set_collision_tags
+var CollisionTagValues = [11, 12] # hopefully a temporary measure for 4.0
+@export var collision_tags = []
 func set_collision_tags(x):
-	for tag in CollisionTags.values():
-		set_collision_layer_bit(tag, tag in x)
+	for tag in CollisionTagValues:
+		set_collision_layer_value(tag, tag in x)
 	collision_tags = x
-export(Array, CollisionTags) var target_collision_tags = [] setget set_target_collision_tags
+@export var target_collision_tags = []
 func set_target_collision_tags(x):
-	for tag in CollisionTags.values():
-		$ExplosionArea.set_collision_mask_bit(tag, tag in x)
+	for tag in CollisionTagValues:
+		$ExplosionArea.set_collision_mask_value(tag, tag in x)
 	target_collision_tags = x
 
-export var collision_line_color = Color.red
-export var collision_line_width = 1.0
-export var _collision_poly_color = Color(1, 0, 0, 0.25)
-var collision_poly_color = PoolColorArray([_collision_poly_color])
-export var trail_length = 0
-export var  trail_width = 0
-export var trail_color = Color.gray
-export var orbit_size =  0
-export var orbit_color = Color.gray
-onready var collision_draw_points = $CollisionPolygon2D.polygon
-export var draw_collision = true
-export var draw_explosion_prediction = false
-export var explosion_prediction_ring_color = Color.blue
-export var explosion_prediction_circle_color = Color(0, 0, 1, 0.25)
-export var explosion_prediction_ring_width = 1.0
+@export var collision_line_color = Color.RED
+@export var collision_line_width = 1.0
+@export var _collision_poly_color = Color(1, 0, 0, 0.25)
+var collision_poly_color = PackedColorArray([_collision_poly_color])
+@export var trail_length = 0
+@export var  trail_width = 0
+@export var trail_color = Color.GRAY
+@export var orbit_size =  0
+@export var orbit_color = Color.GRAY
+@onready var collision_draw_points = $CollisionPolygon2D.polygon
+@export var draw_collision = true
+@export var draw_explosion_prediction = false
+@export var explosion_prediction_ring_color = Color.BLUE
+@export var explosion_prediction_circle_color = Color(0, 0, 1, 0.25)
+@export var explosion_prediction_ring_width = 1.0
 
-export var acceleration = 100
-export var deceleration = 100
-export var effective_range = -1
+@export var acceleration = 100
+@export var deceleration = 100
+@export var effective_range = -1
 
-export var health = -1
-export var explosion_radius = 0 setget set_explosion_radius
+@export var health = -1
+@export var explosion_radius = 0
 func set_explosion_radius(x : int):
 	$ExplosionArea/Collision.shape.radius = x
 	explosion_radius = x
-export var auto_detonate = false
+@export var auto_detonate = false
 
 var dying = false
 
 
 
-# purely for export/init, built into the below variable then never used
+# purely for @export/init, built into the below variable then never used
 # [speed, turntime]
-export(Array, Array, float, -1.0, 1000000, 0.1) var _power_curve = [
+@export var _power_curve = [
 	[0, -1],
 	[250, 4],
 	[500, 3],
@@ -80,23 +81,23 @@ export(Array, Array, float, -1.0, 1000000, 0.1) var _power_curve = [
 # array of PCEs constructed from the above
 var power_curve = []
 var pce : PCE # current speed and turn data
-export var speed = 0 setget set_speed
+@export var speed = 0
 
-onready var remaining_range : float = effective_range
+@onready var remaining_range : float = effective_range
 var course_altered = false
 
 
-onready var roll = G.Roll.STRAIGHT
+@onready var roll = G.Roll.STRAIGHT
 var trail = []
 
-export var max_range_detect_time = 10 # scales linearly to 0 at half range
-export var radar_range = 0.0
-export var visual_range = 0.0
-export var enemy_radar_flat_reduction = 0.0
-export var enemy_visual_percent_reduction = 0.0
+@export var max_range_detect_time = 10 # scales linearly to 0 at half range
+@export var radar_range = 0.0
+@export var visual_range = 0.0
+@export var enemy_radar_flat_reduction = 0.0
+@export var enemy_visual_percent_reduction = 0.0
 var tracked_enemies = []
 var tracking_enemies = [] # enemies that are tracking us
-export var is_decoy = false # always visible, and instantly destroyed when detected
+@export var is_decoy = false # always visible, and instantly destroyed when detected
 
 # export var r_rate_no_interference = -1.0
 # var _power_curve_no_interference # is this possible? since pces scale linearly by r_rate / speed
@@ -110,7 +111,7 @@ export var is_decoy = false # always visible, and instantly destroyed when detec
 # export var radar_direction_multiplier = 1.25
 
 
-onready var is_ammo = get_parent().get_script().get_path().get_file() == "Gun.gd"
+var is_ammo # set on ready
 var auto_groups = ["Airborne"]
 
 func _enter_tree():
@@ -126,6 +127,11 @@ func _ready():
 	set_target_collision_tags(target_collision_tags)
 	set_explosion_radius(explosion_radius)
 	$ExplosionArea.add_child($CollisionPolygon2D.duplicate())
+	print(get_parent(), get_tree().get_root())
+	if get_parent() == get_tree().get_root():
+		is_ammo = false
+	else:
+		is_ammo = get_parent().get_script().get_path().get_file() == "Gun.gd"
 	if(is_ammo):
 		assert(get_parent().get_parent().team == team, "A gun fires a projectile of a different team.")
 	for group in auto_groups:
@@ -174,7 +180,7 @@ func _physics_process(delta):
 			_target = nearest
 		Controller.PURSUE_PLAYER:
 			_target = G.players[get_enemy_team()]
-			assert(_target != null, "Could not find player on team %s." % get_enemy_team())
+			assert(_target != null, "Could not find player on an enemy team.")
 			roll = G.Roll.GUIDED
 	
 	
@@ -186,8 +192,8 @@ func _physics_process(delta):
 	update_tracked_enemies(delta)
 	
 	if(effective_range >= 0):
-		remaining_range -= min(speed*delta, remaining_range)
-		assert(remaining_range >= 0, "remaining range is less than 0 at %10d " % remaining_range)
+		remaining_range -= int(min(speed*delta, remaining_range))
+		assert(remaining_range >= 0, "remaining range is less than 0")
 		if remaining_range == 0 or (targets_in_explosion_range().size() > 0 and auto_detonate):
 			die(auto_detonate)
 			return
@@ -214,13 +220,13 @@ func get_enemy_team():
 
 func is_visible_by_team(vision_team):
 	return true if (vision_team == team or vision_team == -1 or is_decoy) \
-		 else (self in G.visible_airbornes[vision_team])
+		else (self in G.visible_airbornes[vision_team])
 
 func _draw():
 	if not is_visible_by_team(G.client_vision_team):
 		return
 	if(draw_collision and collision_draw_points.size() > 0):
-		var to_draw = collision_draw_points + PoolVector2Array([collision_draw_points[0]])
+		var to_draw = collision_draw_points + PackedVector2Array([collision_draw_points[0]])
 		draw_polyline(to_draw, collision_line_color, collision_line_width)
 		draw_polygon(to_draw, collision_poly_color)
 
@@ -277,15 +283,15 @@ func set_speed(x):
 		if power_curve[i].speed >= x:
 			pce = power_curve[i-1].interpolate_by_speed(x, power_curve[i])
 			return
-	assert(false, "This line should not be reachable")
-	
+	print("This line should never be reached!")
+	get_tree().quit()
 	
 
 # the point that this unit will orbit around if untouched
 func get_orbit(_roll = G.roll_to_int(self.roll)) -> Vector2:
-	return Vector2(0, orbit_radius(_roll) * (-1 if _roll < 1 else 1))
+	return Vector2(0, calc_orbit_radius(_roll) * (-1 if _roll < 1 else 1))
 
-func orbit_radius(_roll = G.roll_to_int(self.roll)):
+func calc_orbit_radius(_roll = G.roll_to_int(self.roll)):
 	return abs(pce.r_radius * _roll)
 
 func die(explode = true):
@@ -307,9 +313,9 @@ func die(explode = true):
 		death.playing = true
 		dying = true
 		for x in collision_tags:
-			set_collision_layer_bit(x, false)
+			set_collision_layer_value(x, false)
 		for x in target_collision_tags:
-			set_collision_mask_bit(x, false)
+			set_collision_mask_value(x, false)
 	else:
 		queue_free()
 	
@@ -342,19 +348,27 @@ func chance_to_see(enemy, delta):
 	
 	var visual = visual_range * (1 - (enemy.enemy_visual_percent_reduction/100))
 	var v_insta = visual / 2 # instant detection range
-	var visual_chance = 0.0 if (visual < dist) \
-		else 1.0 if (v_insta >= dist) \
-		else G.mean_time_to_chance(G.max_mean_detection_time * (dist / v_insta), delta)
+	var visual_chance
+	if (visual < dist):
+		visual_chance = 0.0
+	if(v_insta >= dist):
+		visual_chance = 1.0
+	else:
+		visual_chance =  G.mean_time_to_chance(G.max_mean_detection_time * (dist / v_insta), delta)
 	
 	var radar = radar_range - enemy.enemy_radar_flat_reduction
 	var r_insta = radar / 2 # instant detection range
 	
-	var radar_chance = 0.0 if radar < dist \
-		else 1.0 if r_insta >= dist \
-		else G.mean_time_to_chance(G.max_mean_detection_time * (dist / r_insta), delta)
+	var radar_chance
+	if (radar < dist):
+		radar_chance = 0.0
+	if(r_insta >= dist):
+		radar_chance = 1.0
+	else:
+		radar_chance =  G.mean_time_to_chance(G.max_mean_detection_time * (dist / r_insta), delta)
+	
 #	if max(visual_chance, radar_chance) > 0:
 #		print("%s, %s, %s, %s" % [dist/v_insta if v_insta != 0 else "??", dist/r_insta if r_insta != 0 else "??", visual_chance, radar_chance])
-		
 	return max(visual_chance, radar_chance)
 	
 
@@ -364,27 +378,26 @@ func chance_to_see(enemy, delta):
 # list of var-derived: remaining_range, orbit_radius, orbit
 # returns [final global position, rotation]
 func calculate_movement(delta, _roll = self.roll):
-	match _roll:
-		G.Roll.LEFT:
+	if _roll == G.Roll.LEFT:
 			_roll = -1
-		G.Roll.STRAIGHT:
+	elif _roll == G.Roll.STRAIGHT:
 			_roll = 0
-		G.Roll.RIGHT:
+	elif _roll == G.Roll.RIGHT:
 			_roll = 1
-		G.Roll.GUIDED:
-			if(pce.r_rate == 0):
-				roll = 0 # infinite turn time
-			else:
-				_roll = get_angle_to(get_target_pos()) / (pce.r_rate * delta)
-				if _roll > 1: 
-					_roll = 1
-				elif _roll < -1: 
-					_roll = -1
-				else: 
+	elif _roll == G.Roll.GUIDED:
+		if(pce.r_rate == 0):
+			roll = 0 # infinite turn time
+		else:
+			_roll = get_angle_to(get_target_pos()) / (pce.r_rate * delta)
+			if _roll > 1: 
+				_roll = 1
+			elif _roll < -1: 
+				_roll = -1
+			else: 
 					_roll = 0 # no less than frame turning
 	var rot = pce.r_rate * _roll * delta if pce.r_rate > 0.0 else 0.0
 	var move = speed*delta if effective_range < 0 else min(remaining_range, speed*delta) 
-	var orbit_radius = orbit_radius(_roll) if _roll != 0 else -1
+	var orbit_radius = calc_orbit_radius(_roll) if _roll != 0 else -1
 	if (speed != 0 and orbit_radius != -1 and orbit_radius <= 10000):
 		var orbit = to_global(get_orbit(_roll))
 		var angle_add = 2.0 * PI * _roll * move / pce.r_circumference
