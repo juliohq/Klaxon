@@ -7,12 +7,12 @@ var free_camera = null
 var current_camera = null
 var players = [null, null]
 var max_mean_detection_time = 1
-enum Roll {LEFT, STRAIGHT, RIGHT, GUIDED}
+enum Roll {LEFT = 0, STRAIGHT = 1, RIGHT = 2, GUIDED = 3}
 func roll_to_int(roll):
 	assert(roll in [Roll.LEFT, Roll.STRAIGHT, Roll.RIGHT])
-	return -1 if roll == Roll.LEFT \
-	else 0 if roll == Roll.STRAIGHT \
-	else 1 # if roll == Roll.RIGHT
+	return (-1 if roll == Roll.LEFT
+	else 0 if roll == Roll.STRAIGHT
+	else 1) # if roll == Roll.RIGHT
 
 var client_vision_team = 0
 # -1 means show everything, positive numbers mean show only what that team's units see

@@ -1,4 +1,5 @@
 res://scenes/Bullet.tscn
 res://scenes/World.tscn
-res://scripts/Airborne.gd
-res://scripts/draw_where_color.gdshader
+res://scenes/fog.gd
+res://scripts/fog.gd
+res://scripts/mask_circles.gdshader

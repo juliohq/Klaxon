@@ -7,7 +7,7 @@ const PCE = preload("nodeless/PowerCurveEntry.gd")
 
 @export var team = 0
 
-enum Controller {PLAYER, DUMB, PURSUE_NEAREST = 1001, PURSUE_PLAYER = 1002}
+enum Controller {PLAYER = 0, DUMB = 1, PURSUE_NEAREST = 1001, PURSUE_PLAYER = 1002}
 @export var controller : Controller = Controller.DUMB
 var is_player # set on _enter_tree(), which is before _ready() and before all nodes are in the tree
 func set_controller(x):
@@ -127,7 +127,6 @@ func _ready():
 	set_target_collision_tags(target_collision_tags)
 	set_explosion_radius(explosion_radius)
 	$ExplosionArea.add_child($CollisionPolygon2D.duplicate())
-	print(get_parent(), get_tree().get_root())
 	if get_parent() == get_tree().get_root():
 		is_ammo = false
 	else:
@@ -238,7 +237,7 @@ func _draw():
 		draw_polyline(trail_draw, trail_color, trail_width)
 
 	if(roll in [G.Roll.LEFT, G.Roll.RIGHT] and pce.r_radius > 0 and orbit_size > 0):
-		draw_circle(get_orbit(), orbit_size, orbit_color)
+		draw_circle(get_orbit(G.roll_to_int(roll)), orbit_size, orbit_color)
 	
 	if(draw_explosion_prediction and not dying and speed != 0):
 		var explosion_prediction_pos = to_local(calculate_movement(remaining_range/speed)[0])
@@ -288,10 +287,10 @@ func set_speed(x):
 	
 
 # the point that this unit will orbit around if untouched
-func get_orbit(_roll = G.roll_to_int(self.roll)) -> Vector2:
+func get_orbit(_roll = G.roll_to_int(roll)) -> Vector2:
 	return Vector2(0, calc_orbit_radius(_roll) * (-1 if _roll < 1 else 1))
 
-func calc_orbit_radius(_roll = G.roll_to_int(self.roll)):
+func calc_orbit_radius(_roll = G.roll_to_int(roll)):
 	return abs(pce.r_radius * _roll)
 
 func die(explode = true):
