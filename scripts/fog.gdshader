@@ -1,0 +1,37 @@
+shader_type canvas_item;
+
+uniform int array_length = 0;
+uniform bool discard_all = true;
+uniform vec2 unit_positions[1024];
+uniform float unit_ranges[1024];
+
+
+uniform mat4 global_transform;
+varying vec2 world_position;
+
+
+void vertex(){
+	world_position = (global_transform * vec4(VERTEX, 0.0, 1.0)).xy;
+}
+
+void fragment(){
+
+	if(discard_all){
+		discard;
+	}else{
+		bool skip = false;
+		vec2 zero = vec2(0,0);
+		if(unit_ranges[0] >= 0.1){
+			discard;
+		}
+		for(int i = 0; i < array_length && !skip; i += 1){
+			if(unit_ranges[i] != 0.0){
+//				if((unit_positions[i] != zero) && (length(world_position - unit_positions[i]) <= unit_ranges[i])){ // TODO left condition is never true
+				skip = true;
+			}
+		}
+		if(skip){
+			discard;
+		}
+	}
+}

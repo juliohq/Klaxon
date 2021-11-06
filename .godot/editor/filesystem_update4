@@ -1,5 +1,6 @@
 res://scenes/Bullet.tscn
+res://scenes/Plane.tscn
 res://scenes/World.tscn
-res://scenes/fog.gd
+res://scripts/Airborne.gd
 res://scripts/fog.gd
-res://scripts/mask_circles.gdshader
+res://scripts/fog.gdshader

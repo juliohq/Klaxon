@@ -91,8 +91,9 @@ var course_altered = false
 var trail = []
 
 @export var max_range_detect_time = 10 # scales linearly to 0 at half range
-@export var radar_range = 0.0
-@export var visual_range = 0.0
+@export var radar_range : float = 0.0
+@export var visual_range : float = 0.0
+@onready var higher_range : float = max(radar_range, visual_range)
 @export var enemy_radar_flat_reduction = 0.0
 @export var enemy_visual_percent_reduction = 0.0
 var tracked_enemies = []

@@ -42,7 +42,7 @@ func _input(event):
 			G.player_camera.current = true
 		else:
 			assert(G.current_camera == G.player_camera, "Current_camera should be player_camera but is not.")
-			G.free_camera.make_current()
+			G.free_camera.current = true
 			G.free_camera.global_position = G.player_camera.global_position
 		
 
