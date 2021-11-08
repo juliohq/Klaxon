@@ -16,10 +16,10 @@
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_l81t2"]
 shader = ExtResource( "7_tj8av" )
-shader_param/array_length = 10000
-shader_param/discard_all = false
-shader_param/unit_positions = PackedVector2Array()
+shader_param/unit_positions = null
 shader_param/unit_ranges = PackedFloat32Array()
+shader_param/array_length = null
+shader_param/discard_all = false
 shader_param/global_transform = null
 
 [node name="World" type="Node2D"]

@@ -1,9 +1,10 @@
 shader_type canvas_item;
 
+uniform vec2 unit_positions[1024]; // due to an engine bug, uniform arrays must be declared before other uniforms
+uniform float unit_ranges[1024];
 uniform int array_length = 0;
 uniform bool discard_all = true;
-uniform vec2 unit_positions[1024];
-uniform float unit_ranges[1024];
+
 
 
 uniform mat4 global_transform;
@@ -21,12 +22,8 @@ void fragment(){
 	}else{
 		bool skip = false;
 		vec2 zero = vec2(0,0);
-		if(unit_ranges[0] >= 0.1){
-			discard;
-		}
 		for(int i = 0; i < array_length && !skip; i += 1){
-			if(unit_ranges[i] != 0.0){
-//				if((unit_positions[i] != zero) && (length(world_position - unit_positions[i]) <= unit_ranges[i])){ // TODO left condition is never true
+			if(length(world_position - unit_positions[i]) <= unit_ranges[i]){
 				skip = true;
 			}
 		}
