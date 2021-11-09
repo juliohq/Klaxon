@@ -71,6 +71,7 @@ __meta__ = {
 [node name="Enemy Plane" parent="." instance=ExtResource( "4" )]
 position = Vector2(900, 500)
 collision_layer = 1
+team = 1
 controller = 1001
 collision_tags = []
 trail_length = 180

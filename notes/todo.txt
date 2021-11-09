@@ -24,7 +24,7 @@ Render Fog, then Aura, then Plane.
 Render plane only where Aura, as a shader.
 Set plane render priority to -1.
 (On Godot 4.0 they have uniform shaders so it should instead be do not render fog within visual distance.)
-✔️ confirmed this will work, though it is messy
+✔️
 
 
 Interference increases if you don't cap your r_rate or the enemy jams you (directional radar only).
