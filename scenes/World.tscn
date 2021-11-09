@@ -69,9 +69,8 @@ __meta__ = {
 }
 
 [node name="Enemy Plane" parent="." instance=ExtResource( "4" )]
-position = Vector2(-200, 0)
+position = Vector2(900, 500)
 collision_layer = 1
-team = 1
 controller = 1001
 collision_tags = []
 trail_length = 180
@@ -114,10 +113,10 @@ script = null
 
 [node name="ColorRect" type="ColorRect" parent="Background"]
 show_behind_parent = true
-offset_left = -10000.0
-offset_top = -10000.0
-offset_right = 10000.0
-offset_bottom = 10000.0
+offset_left = -8555.0
+offset_top = -9359.0
+offset_right = 11445.0
+offset_bottom = 10641.0
 color = Color(0.6, 0.6, 0.6, 1)
 script = null
 __meta__ = {

@@ -20,7 +20,7 @@ func _process(_delta):
 	var units = get_tree().get_nodes_in_group("Airborne")
 	
 	var array_length = 0
-	for i in range(units.size()-1):
+	for i in range(units.size()):
 		if (units[array_length].team == team):
 			unit_positions[i] = units[array_length].global_position
 			unit_ranges[i] = units[array_length].higher_range
