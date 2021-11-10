@@ -1,5 +1,11 @@
+res://scenes/Bomb.tscn
 res://scenes/Bullet.tscn
+res://scenes/Gun.tscn
 res://scenes/Plane.tscn
 res://scenes/World.tscn
+res://scripts/FollowPlayerCamera.gd
+res://scripts/FreeCamera.gd
+res://scripts/Unit.gd
+res://scripts/World.gd
 res://scripts/fog.gd
 res://scripts/fog.gdshader

@@ -11,14 +11,15 @@ var cli_activated = false
 func camera_input(delta, c):
 	var pan = PAN_SPEED * c.zoom.x * delta
 	var zoom = ZOOM_SPEED * delta
-	if Input.is_action_pressed("pan_left"):
-		c.position.x -= pan
-	if Input.is_action_pressed('pan_right'):
-		c.position.x += pan
-	if Input.is_action_pressed("pan_up"):
-		c.position.y -= pan
-	if Input.is_action_pressed("pan_down"):
-		c.position.y += pan
+	if(c != G.player_camera):
+		if Input.is_action_pressed("pan_left"):
+			c.position.x -= pan
+		if Input.is_action_pressed('pan_right'):
+			c.position.x += pan
+		if Input.is_action_pressed("pan_up"):
+			c.position.y -= pan
+		if Input.is_action_pressed("pan_down"):
+			c.position.y += pan
 	if Input.is_action_just_released('zoom_out'):
 		_zoom(zoom, c)
 	if Input.is_action_just_released('zoom_in'):
@@ -30,6 +31,7 @@ func _zoom(i, c):
 
 func _process(delta):
 	var c = G.current_camera
+	assert(c != null, "G has no current camera.")
 	if(c):
 		camera_input(delta, c)
 
@@ -40,10 +42,12 @@ func _input(event):
 	if (event.is_action_pressed("follow_player_toggle")):
 		if(G.current_camera == G.free_camera):
 			G.player_camera.current = true
+			G.player_camera.zoom = G.current_camera.zoom
 		else:
 			assert(G.current_camera == G.player_camera, "Current_camera should be player_camera but is not.")
 			G.free_camera.current = true
-			G.free_camera.global_position = G.player_camera.global_position
+			G.free_camera.global_position = G.current_camera.global_position
+			G.free_camera.zoom = G.current_camera.zoom
 		
 
 func toggle_console():

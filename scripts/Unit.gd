@@ -72,12 +72,7 @@ var dying = false
 
 # purely for @export/init, built into the below variable then never used
 # [speed, turntime]
-@export var _power_curve = [
-	[0, -1],
-	[250, 4],
-	[500, 3],
-	[1000, 0.1]
-]
+@export var _power_curve = [[0, -1],[250, 4],[500, 3],[1000, 0.1]]
 # array of PCEs constructed from the above
 var power_curve = []
 var pce : PCE # current speed and turn data
@@ -118,7 +113,7 @@ var auto_groups = ["Airborne"]
 func _enter_tree():
 	G = $"/root/Globals"
 	set_controller(controller)
-	
+
 
 func _ready():
 	for x in _power_curve:
@@ -192,7 +187,7 @@ func _physics_process(delta):
 	update_tracked_enemies(delta)
 	
 	if(effective_range >= 0):
-		remaining_range -= int(min(speed*delta, remaining_range))
+		remaining_range = remaining_range - min(speed*delta, remaining_range)
 		assert(remaining_range >= 0, "remaining range is less than 0")
 		if remaining_range == 0 or (targets_in_explosion_range().size() > 0 and auto_detonate):
 			die(auto_detonate)
@@ -305,13 +300,14 @@ func die(explode = true):
 	else:
 #		print("%s is dying peacefully" % self)
 		pass
-	var death = get_node_or_null("death")
+	var death = get_node_or_null("DeathAnim")
 	if death != null:
 		set_physics_process(false)
 		collision_draw_points = []
 		death.visible = true
 		death.playing = true
 		dying = true
+		$Masks.visible = false
 		for x in collision_tags:
 			set_collision_layer_value(x, false)
 		for x in target_collision_tags:

@@ -1,12 +1,11 @@
-[gd_scene load_steps=13 format=3 uid="uid://cv2so7c2yiqfp"]
+[gd_scene load_steps=12 format=3 uid="uid://cv2so7c2yiqfp"]
 
 [ext_resource type="Script" path="res://scripts/FollowPlayerCamera.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/FreeCamera.gd" id="2"]
 [ext_resource type="Script" path="res://scripts/World.gd" id="3"]
-[ext_resource type="PackedScene" uid="uid://sfysxmep7po8" path="res://scenes/Plane.tscn" id="4"]
-[ext_resource type="PackedScene" path="res://scenes/Gun.tscn" id="5"]
+[ext_resource type="PackedScene" uid="uid://cq5p8uil717wb" path="res://scenes/Plane.tscn" id="4"]
+[ext_resource type="PackedScene" uid="uid://d0bb4rhq3ak6t" path="res://scenes/Gun.tscn" id="5"]
 [ext_resource type="Texture2D" uid="uid://ph2hk5j62t5x" path="res://resources/burano.png" id="6"]
-[ext_resource type="Texture2D" uid="uid://b86wnbptjpflm" path="res://resources/big_circle.png" id="7"]
 [ext_resource type="Shader" path="res://scripts/fog.gdshader" id="7_tj8av"]
 [ext_resource type="Script" path="res://scripts/fog.gd" id="9_ogm7a"]
 
@@ -27,58 +26,21 @@ light_mask = 2
 script = ExtResource( "3" )
 
 [node name="Plane" parent="." instance=ExtResource( "4" )]
-collision_layer = 1
-motion_mode = 1
-controller = 0
+skew = 4.37114e-08
 collision_tags = []
-_collision_poly_color = Color(0.980392, 0.0392157, 0.0392157, 0.25098)
-trail_length = 180
-trail_color = Color(0.74902, 0.74902, 0.74902, 0.121569)
-orbit_size = 8
-orbit_color = Color(0.74902, 0.74902, 0.74902, 0.129412)
-_power_curve = [[0, -1], [250, 4], [500, 3], [1000, 2.0]]
-radar_range = 1000.0
+target_collision_tags = []
+_power_curve = [[0, -1.0], [250, 4.0], [500, 3.0], [1000, 0.2]]
 
-[node name="FollowCamera" type="Camera2D" parent="Plane"]
-zoom = Vector2(5, 5)
+[node name="PlayerCamera" type="Camera2D" parent="Plane"]
 script = ExtResource( "1" )
 
 [node name="Gun" parent="Plane" instance=ExtResource( "5" )]
 
-[node name="Decoy Test" parent="Plane/Gun" instance_placeholder="res://scenes/Plane.tscn"]
-collision_tags = [11]
-collision_line_color = Color(0.678431, 0.603922, 0.603922, 1)
-acceleration = 0
-deceleration = 0
-is_decoy = true
-
-[node name="VisionMasks" type="Node2D" parent="Plane"]
-show_behind_parent = true
-script = null
-
-[node name="Aura" type="TextureRect" parent="Plane/VisionMasks"]
-show_behind_parent = true
-offset_left = -512.0
-offset_top = -512.0
-offset_right = 512.0
-offset_bottom = 512.0
-texture = ExtResource( "7" )
-script = null
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Enemy Plane" parent="." instance=ExtResource( "4" )]
-position = Vector2(900, 500)
-collision_layer = 1
-team = 1
-controller = 1001
-collision_tags = []
-trail_length = 180
-trail_color = Color(0.74902, 0.74902, 0.74902, 0.121569)
-orbit_size = 8
-orbit_color = Color(0.74902, 0.74902, 0.74902, 0.129412)
-radar_range = 500.0
+[node name="FreeCamera" type="Camera2D" parent="."]
+skew = 4.37114e-08
+current = true
+zoom = Vector2(5, 5)
+script = ExtResource( "2" )
 
 [node name="UI" type="CanvasLayer" parent="."]
 script = null
@@ -102,11 +64,6 @@ script = null
 __meta__ = {
 "_edit_use_anchors_": false
 }
-
-[node name="FreeCamera" type="Camera2D" parent="."]
-current = true
-zoom = Vector2(5, 5)
-script = ExtResource( "2" )
 
 [node name="Background" type="CanvasLayer" parent="."]
 layer = -100

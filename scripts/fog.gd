@@ -10,7 +10,6 @@ func _ready():
 		blank_ranges.append(0.0)
 
 func _process(_delta):
-	var x = material
 	var team = G.client_vision_team
 	if(team == -1):
 		material.set_shader_param("discard_all", true)
