@@ -16,7 +16,7 @@ func _process(_delta):
 		return
 	var unit_positions = blank_positions
 	var unit_ranges = blank_ranges
-	var units = get_tree().get_nodes_in_group("Airborne")
+	var units = get_tree().get_nodes_in_group("Unit")
 	
 	var array_length = 0
 	for i in range(units.size()):

@@ -108,7 +108,7 @@ var tracking_enemies = [] # enemies that are tracking us
 
 
 var is_ammo # set on ready
-var auto_groups = ["Airborne"]
+var auto_groups = ["Unit"]
 
 func _enter_tree():
 	G = $"/root/Globals"
@@ -162,15 +162,15 @@ func _physics_process(delta):
 			roll = G.Roll.GUIDED
 			var nearest = null
 			var nearest_dist = null
-			for airborne in get_tree().get_nodes_in_group('Airborne'):
-				if airborne.team != team:
+			for unit in get_tree().get_nodes_in_group('Unit'):
+				if unit.team != team:
 					if(nearest == null):
-						nearest = airborne
-						nearest_dist = airborne.global_position.distance_to(global_position)
+						nearest = unit
+						nearest_dist = unit.global_position.distance_to(global_position)
 					else:
-						var dist = airborne.global_position.distance_to(global_position)
+						var dist = unit.global_position.distance_to(global_position)
 						if (dist < nearest_dist):
-							nearest = airborne
+							nearest = unit
 							nearest_dist = dist
 			_target = nearest
 		Controller.PURSUE_PLAYER:
@@ -215,7 +215,7 @@ func get_enemy_team():
 
 func is_visible_by_team(vision_team):
 	return true if (vision_team == team or vision_team == -1 or is_decoy) \
-		else (self in G.visible_airbornes[vision_team])
+		else (self in G.visible_units[vision_team])
 
 func _draw():
 	if not is_visible_by_team(G.client_vision_team):
@@ -328,8 +328,8 @@ func update_tracked_enemies(delta):
 		if chance_to_see(enemy, delta) == 0:
 			tracked_enemies.erase(enemy)
 			enemy.tracking_enemies.erase(self)
-	var airbornes =  get_tree().get_nodes_in_group("Airborne")
-	for enemy in airbornes:
+	var units =  get_tree().get_nodes_in_group("Unit")
+	for enemy in units:
 		if(enemy.team != team and not (enemy in tracked_enemies)):
 			if(randf() <= chance_to_see(enemy, delta)):
 				if(enemy.is_decoy):

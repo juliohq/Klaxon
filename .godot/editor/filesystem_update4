@@ -5,7 +5,9 @@ res://scenes/Plane.tscn
 res://scenes/World.tscn
 res://scripts/FollowPlayerCamera.gd
 res://scripts/FreeCamera.gd
+res://scripts/Gun.gd
 res://scripts/Unit.gd
 res://scripts/World.gd
 res://scripts/fog.gd
 res://scripts/fog.gdshader
+res://scripts/nodeless/Globals.gd
