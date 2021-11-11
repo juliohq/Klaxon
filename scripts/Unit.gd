@@ -57,7 +57,7 @@ var collision_poly_color = PackedColorArray([_collision_poly_color])
 
 @export var acceleration = 100
 @export var deceleration = 100
-@export var effective_range = -1
+@export var effective_range = -1.0
 
 @export var health = -1
 @export var explosion_radius = 0
@@ -235,13 +235,16 @@ func _draw():
 	if(roll in [G.Roll.LEFT, G.Roll.RIGHT] and pce.r_radius > 0 and orbit_size > 0):
 		draw_circle(get_orbit(G.roll_to_int(roll)), orbit_size, orbit_color)
 	
-	if(draw_explosion_prediction and not dying and speed != 0):
-		var explosion_prediction_pos = to_local(calculate_movement(remaining_range/speed)[0])
-		draw_circle(explosion_prediction_pos, 
-			$ExplosionArea/Collision.shape.radius*(1.0-(remaining_range/effective_range)),
-			explosion_prediction_circle_color)
-		draw_arc(explosion_prediction_pos, $ExplosionArea/Collision.shape.radius, 0, 2*PI, 32, 
-		explosion_prediction_ring_color, explosion_prediction_ring_width)
+	if(draw_explosion_prediction and (not dying) and (speed != 0) and (effective_range > 0.0)):
+			var explosion_prediction_pos = to_local(calculate_movement(remaining_range/speed)[0])
+			var max_radius = $ExplosionArea/Collision.shape.radius
+			var mult = 1.0 - (remaining_range / effective_range)
+			var radius = max_radius * mult
+			if(radius > 0.0):
+				draw_circle(explosion_prediction_pos, radius,
+					explosion_prediction_circle_color)
+				draw_arc(explosion_prediction_pos, $ExplosionArea/Collision.shape.radius, 0, 2*PI, 32, 
+				explosion_prediction_ring_color, explosion_prediction_ring_width)
 	
 #	if(tracking_enemies != []):
 #		draw_circle(Vector2(500,0), 5, Color.red)
