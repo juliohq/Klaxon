@@ -27,6 +27,9 @@ Set plane render priority to -1.
 ✔️
 
 Bombs flash briefly when spawned, it is suspected this has to do with the explosion prediction
+✔️
+
+Prerequisite for a vertical sidebar UI is probably having the camera centered on the remaining portion of the screen.
 
 Interference increases if you don't cap your r_rate or the enemy jams you (directional radar only).
 	It regenerates at a rate linearly going from double to single at 0 and full.

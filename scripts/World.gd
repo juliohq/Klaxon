@@ -38,7 +38,7 @@ func _process(delta):
 func _input(event):
 	if event.is_action_pressed('toggle_cli'):
 		toggle_console()
-		get_tree().set_input_as_handled()
+		get_viewport().set_input_as_handled()
 	if (event.is_action_pressed("follow_player_toggle")):
 		if(G.current_camera == G.free_camera):
 			G.player_camera.current = true

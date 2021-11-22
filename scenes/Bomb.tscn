@@ -1,7 +1,8 @@
-[gd_scene load_steps=70 format=3 uid="uid://u5twr0avaup4"]
+[gd_scene load_steps=71 format=3 uid="uid://u5twr0avaup4"]
 
 [ext_resource type="PackedScene" uid="uid://cq5p8uil717wb" path="res://scenes/Plane.tscn" id="1_uw573"]
 [ext_resource type="Texture2D" uid="uid://bqu2lj6ehhnkv" path="res://resources/explosion/spritesheet.png" id="2_e54jm"]
+[ext_resource type="Texture2D" uid="uid://dgivrin6x2dkt" path="res://resources/pixil-frame-0.png" id="3_v07fo"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_bdf8u"]
 atlas = ExtResource( "2_e54jm" )
@@ -294,6 +295,12 @@ polygon = PackedVector2Array(-25, 50, -25, -50, 25, 0)
 [node name="DeathAnim" type="AnimatedSprite2D" parent="." index="3"]
 visible = false
 frames = SubResource( "SpriteFrames_1psb1" )
+script = null
+
+[node name="Sprite2D" type="Sprite2D" parent="." index="4"]
+position = Vector2(-10, 0)
+rotation = 1.5708
+texture = ExtResource( "3_v07fo" )
 script = null
 
 [connection signal="animation_finished" from="DeathAnim" to="." method="_on_DeathAnim_animation_finished"]

@@ -2,4 +2,7 @@ res://scenes/Bomb.tscn
 res://scenes/Gun.tscn
 res://scenes/Plane.tscn
 res://scenes/World.tscn
+res://scenes/test.tscn
+res://scripts/Bars.gd
 res://scripts/Unit.gd
+res://scripts/nodeless/Globals.gd

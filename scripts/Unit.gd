@@ -12,10 +12,11 @@ enum Controller {PLAYER = 0, DUMB = 1, PURSUE_NEAREST = 1001, PURSUE_PLAYER = 10
 var is_player # set on _enter_tree(), which is before _ready() and before all nodes are in the tree
 func set_controller(x):
 	controller = x
-	is_player = controller == Controller.PLAYER
-	if(x == Controller.PLAYER):
+	is_player = x == Controller.PLAYER
+	if(is_player):
 		assert(G.players[team] == null or G.players[team] == self, "Player isn't set in the player array")
 		G.players[team] = self
+		$"/root/World/UI/Bars".set_unit(self)
 
 
 # may be position node or vector, use get_target_pos() to access position/node as position
@@ -59,7 +60,8 @@ var collision_poly_color = PackedColorArray([_collision_poly_color])
 @export var deceleration = 100
 @export var effective_range = -1.0
 
-@export var health = -1
+@export var max_health = -1
+@onready var health = max_health
 @export var explosion_radius = 0
 func set_explosion_radius(x : int):
 	$ExplosionArea/Collision.shape.radius = x
@@ -67,7 +69,7 @@ func set_explosion_radius(x : int):
 @export var auto_detonate = false
 
 var dying = false
-
+@onready var sprite = $Sprite2D
 
 
 # purely for @export/init, built into the below variable then never used
@@ -311,6 +313,8 @@ func die(explode = true):
 		death.playing = true
 		dying = true
 		$Masks.visible = false
+		if(sprite != null):
+			sprite.visible = false
 		for x in collision_tags:
 			set_collision_layer_value(x, false)
 		for x in target_collision_tags:

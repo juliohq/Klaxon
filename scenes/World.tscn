@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://cv2so7c2yiqfp"]
+[gd_scene load_steps=17 format=3 uid="uid://cdv3maktutvnq"]
 
 [ext_resource type="Script" path="res://scripts/FollowPlayerCamera.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/FreeCamera.gd" id="2"]
@@ -6,8 +6,13 @@
 [ext_resource type="PackedScene" uid="uid://cq5p8uil717wb" path="res://scenes/Plane.tscn" id="4"]
 [ext_resource type="PackedScene" uid="uid://d0bb4rhq3ak6t" path="res://scenes/Gun.tscn" id="5"]
 [ext_resource type="Texture2D" uid="uid://ph2hk5j62t5x" path="res://resources/burano.png" id="6"]
+[ext_resource type="Texture2D" uid="uid://b4vgp38v81tue" path="res://resources/gui/energy_bar_bg.png" id="6_1eth7"]
+[ext_resource type="Script" path="res://scripts/Bars.gd" id="6_onlvc"]
 [ext_resource type="Shader" path="res://scripts/fog.gdshader" id="7_tj8av"]
-[ext_resource type="Script" path="res://scripts/fog.gd" id="9_ogm7a"]
+[ext_resource type="Texture2D" uid="uid://dmgc7gkhvrjqt" path="res://resources/gui/energy_bar_green.png" id="7_x0y7u"]
+[ext_resource type="Texture2D" uid="uid://c5yurt346j5jn" path="res://resources/gui/energy_bar_azure.png" id="8_75t2l"]
+[ext_resource type="Texture2D" uid="uid://cdivsddegebou" path="res://resources/gui/energy_bar_brown.png" id="9_4pcll"]
+[ext_resource type="Script" path="res://scripts/Fog.gd" id="9_ogm7a"]
 
 [sub_resource type="StyleBoxEmpty" id="1"]
 
@@ -46,6 +51,11 @@ script = ExtResource( "2" )
 script = null
 
 [node name="BottomText" type="Label" parent="UI"]
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 200.0
+offset_top = -30.0
+offset_right = 500.0
 text = "Bottom Text"
 clip_text = true
 structured_text_bidi_override_options = []
@@ -55,11 +65,126 @@ __meta__ = {
 }
 
 [node name="CLI" type="LineEdit" parent="UI"]
+offset_left = 8.0
+offset_top = 36.0
+offset_right = 68.0
+offset_bottom = 59.0
 theme_override_styles/focus = SubResource( "1" )
 theme_override_styles/normal = SubResource( "2" )
 shortcut_keys_enabled = false
 selecting_enabled = false
 structured_text_bidi_override_options = []
+script = null
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Bars" type="Control" parent="UI"]
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 5.0
+offset_top = -45.0
+script = ExtResource( "6_onlvc" )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HP" type="Node2D" parent="UI/Bars"]
+skew = 4.37114e-08
+script = null
+
+[node name="Label" type="Label" parent="UI/Bars/HP"]
+offset_left = 5.0
+offset_right = 25.0
+offset_bottom = 23.0
+theme_override_font_sizes/font_size = 14
+text = "HP
+"
+clip_text = true
+structured_text_bidi_override_options = []
+script = null
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Bar" type="TextureProgressBar" parent="UI/Bars/HP"]
+anchor_right = 500.0
+offset_left = 30.0
+offset_right = 269.0
+offset_bottom = 39.0
+rect_scale = Vector2(0.5, 0.5)
+value = 50.0
+texture_under = ExtResource( "6_1eth7" )
+texture_progress = ExtResource( "7_x0y7u" )
+script = null
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="EW" type="Node2D" parent="UI/Bars"]
+position = Vector2(0, 20)
+skew = 4.37114e-08
+script = null
+
+[node name="Label" type="Label" parent="UI/Bars/EW"]
+offset_left = 5.0
+offset_right = 30.0
+offset_bottom = 23.0
+theme_override_font_sizes/font_size = 14
+text = "EW
+"
+clip_text = true
+structured_text_bidi_override_options = []
+script = null
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Bar" type="TextureProgressBar" parent="UI/Bars/EW"]
+anchor_right = 500.0
+offset_left = 30.0
+offset_right = 269.0
+offset_bottom = 39.0
+rect_scale = Vector2(0.5, 0.5)
+value = 30.0
+texture_under = ExtResource( "6_1eth7" )
+texture_progress = ExtResource( "8_75t2l" )
+script = null
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="FL" type="Node2D" parent="UI/Bars"]
+position = Vector2(159, 0)
+skew = 4.37114e-08
+script = null
+
+[node name="Label" type="Label" parent="UI/Bars/FL"]
+offset_left = -7.62939e-06
+offset_top = -19.0
+offset_right = 22.0
+offset_bottom = 4.0
+theme_override_font_sizes/font_size = 14
+text = "FL
+"
+clip_text = true
+structured_text_bidi_override_options = []
+script = null
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Bar" type="TextureProgressBar" parent="UI/Bars/FL"]
+anchor_right = 500.0
+offset_left = -2.0
+offset_top = 40.0
+offset_right = 246.0
+offset_bottom = 80.0
+rect_rotation = -1.5708
+rect_scale = Vector2(0.16, 0.5)
+value = 80.0
+texture_under = ExtResource( "6_1eth7" )
+texture_progress = ExtResource( "9_4pcll" )
 script = null
 __meta__ = {
 "_edit_use_anchors_": false
@@ -71,10 +196,10 @@ script = null
 
 [node name="ColorRect" type="ColorRect" parent="Background"]
 show_behind_parent = true
-offset_left = -8555.0
-offset_top = -9359.0
-offset_right = 11445.0
-offset_bottom = 10641.0
+offset_left = -8623.0
+offset_top = -9055.0
+offset_right = 11377.0
+offset_bottom = 10945.0
 color = Color(0.6, 0.6, 0.6, 1)
 script = null
 __meta__ = {

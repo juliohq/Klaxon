@@ -1,5 +1,9 @@
+Control
+CanvasLayer
+Node2D
+RichTextLabel
+TextureProgressBar
+Sprite2D
 AnimatedSprite2D
 Camera2D
 TextureRect
-Node2D
-Sprite2D
