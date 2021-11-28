@@ -4,3 +4,4 @@ res://scenes/Plane.tscn
 res://scenes/World.tscn
 res://scenes/test.tscn
 res://scripts/Unit.gd
+res://scripts/nodeless/PowerCurveEntry.gd

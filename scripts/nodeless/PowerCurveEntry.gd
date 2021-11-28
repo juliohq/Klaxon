@@ -1,6 +1,6 @@
 var speed : float
-var r_rate # 0 = does not turn
-var r_time  # -1 = does not turn
+var r_rate # radians per second, 0 = does not turn
+var r_time  # time to 360, -1 = does not turn
 var r_radius
 var r_circumference : float
 

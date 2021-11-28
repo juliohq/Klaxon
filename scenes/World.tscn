@@ -37,6 +37,7 @@ skew = 4.37114e-08
 collision_tags = []
 target_collision_tags = []
 _power_curve = [[0, -1.0], [250, 4.0], [500, 3.0], [1000, 0.2]]
+evasive_r_rate_cap = 90.0
 
 [node name="PlayerCamera" type="Camera2D" parent="Plane"]
 script = ExtResource( "1" )
@@ -80,7 +81,7 @@ anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 200.0
 offset_top = -30.0
-offset_right = 500.0
+offset_right = 800.0
 text = "Bottom Text"
 clip_text = true
 structured_text_bidi_override_options = []
@@ -221,10 +222,10 @@ script = null
 
 [node name="ColorRect" type="ColorRect" parent="Background"]
 show_behind_parent = true
-offset_left = -8541.0
-offset_top = -9063.0
-offset_right = 11459.0
-offset_bottom = 10937.0
+offset_left = -8709.0
+offset_top = -9142.0
+offset_right = 11291.0
+offset_bottom = 10858.0
 color = Color(0.6, 0.6, 0.6, 1)
 script = null
 __meta__ = {

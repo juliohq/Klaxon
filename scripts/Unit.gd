@@ -78,6 +78,8 @@ var dying = false
 @export var _power_curve = [[0, -1],[250, 4],[500, 3],[1000, 0.1]]
 # array of PCEs constructed from the above
 var power_curve = []
+# array of PCEs constructed from the above and the evasive_r_rate_cap
+var capped_power_curve = []
 var pce : PCE # current speed and turn data
 @export var speed = 0
 
@@ -97,7 +99,8 @@ var tracked_enemies = []
 var tracking_enemies = [] # enemies that are tracking us
 @export var is_decoy = false # always visible, and instantly destroyed when detected
 
-# export var r_rate_no_interference = -1.0
+var evasive_action = true
+@export var evasive_r_rate_cap = -1.0
 # var _power_curve_no_interference # is this possible? since pces scale linearly by r_rate / speed
 # export var interference_time = 30.0
 # export var interference_safe_point = 0.75
@@ -118,8 +121,18 @@ func _enter_tree():
 
 
 func _ready():
-	for x in _power_curve:
-		power_curve.append(PCE.new(x[0], x[1]))
+	var time_cap = 360/evasive_r_rate_cap
+	for pair in _power_curve:
+		var _speed = pair[0]
+		var time = pair[1]
+		
+		var _pce = PCE.new(_speed, time)
+		power_curve.append(_pce)
+		
+		if(time > 0 and evasive_r_rate_cap > 0 and time_cap > time):
+			time = max(time, time_cap)
+		var capped_pce = PCE.new(_speed, time)
+		capped_power_curve.append(capped_pce)
 	set_speed(speed)
 	set_collision_tags(collision_tags)
 	set_target_collision_tags(target_collision_tags)
@@ -138,14 +151,18 @@ func _physics_process(delta):
 	match(controller):
 		Controller.PLAYER:
 			if !$"../".cli_activated:
+				if Input.is_action_just_pressed('evasive_action_toggle'):
+					evasive_action = not evasive_action
 				if Input.is_action_pressed('accelerate'):
 					set_speed(speed + acceleration * delta)
 					course_altered = true
 					_target = null
-				if Input.is_action_pressed('decelerate'):
+				elif Input.is_action_pressed('decelerate'):
 					set_speed(speed - deceleration * delta)
 					course_altered = true
 					_target = null
+				elif Input.is_action_just_pressed('evasive_action_toggle'):
+					set_speed(speed)
 				if Input.is_action_pressed('turn_left'):
 					roll = G.Roll.LEFT
 					course_altered = true
@@ -158,6 +175,7 @@ func _physics_process(delta):
 					roll = G.Roll.GUIDED
 				else:
 					roll = G.Roll.STRAIGHT
+			
 		Controller.DUMB:
 			pass
 		Controller.PURSUE_NEAREST:
@@ -182,7 +200,7 @@ func _physics_process(delta):
 	
 	
 	var move = calculate_movement(delta)
-	
+		
 	global_position = move[0]
 	rotation += move[1]
 	
@@ -203,9 +221,10 @@ func _physics_process(delta):
 	
 	if(controller == Controller.PLAYER):
 		var time_string = "none" if pce.r_time < 0 else "%.1f" % pce.r_time
+		pass
 		$"../UI/BottomText".text = \
-		("spd: %.0f, rtime: %s, rrad: %.0f" % \
-			[speed, time_string, pce.r_radius])	
+			("speed: %.0f time: %s radius: %.0f, deg/sec: %.0f%s" % \
+			[speed, time_string, pce.r_radius, rad2deg(pce.r_rate), ", E" if evasive_action else ""])	
 		
 	course_altered = false
 
@@ -223,10 +242,9 @@ func _draw():
 	if not is_visible_by_team(G.client_vision_team):
 		return
 #	if(draw_collision and collision_draw_points.size() > 0):
-	if(false):
-		var to_draw = collision_draw_points + PackedVector2Array([collision_draw_points[0]])
-		draw_polyline(to_draw, collision_line_color, collision_line_width)
-		draw_polygon(to_draw, collision_poly_color)
+#		var to_draw = collision_draw_points + PackedVector2Array([collision_draw_points[0]])
+#		draw_polyline(to_draw, collision_line_color, collision_line_width)
+#		draw_polygon(to_draw, collision_poly_color)
 
 	if trail_length > 0 and trail.size() >= 2:
 		var trail_draw = []
@@ -264,25 +282,28 @@ func _input(event):
 
 func _on_DeathAnim_animation_finished():
 	queue_free()
+	
 
 func max_speed():
-	return power_curve[power_curve.size()-1].speed
+	var pc = power_curve if evasive_action else capped_power_curve
+	return pc[pc.size()-1].speed
 
 func min_speed():
-	return power_curve[0].speed
+	return power_curve[0].speed # we don't need capped_power_curve here
 
 func set_speed(x):
-	if (power_curve == []):
+	var pc = power_curve if evasive_action else capped_power_curve
+	if (pc == []):
 		speed = x
 		return
 	x = clamp(x, min_speed(), max_speed())
 	speed = x
-	if(power_curve[0].speed >= x):
-		pce = power_curve[0]
+	if(pc[0].speed >= x):
+		pce = pc[0]
 		return
-	for i in range(1, power_curve.size()):
-		if power_curve[i].speed >= x:
-			pce = power_curve[i-1].interpolate_by_speed(x, power_curve[i])
+	for i in range(1, pc.size()):
+		if pc[i].speed >= x:
+			pce = pc[i-1].interpolate_by_speed(x, pc[i])
 			return
 	print("This line should never be reached!")
 	get_tree().quit()
@@ -399,7 +420,8 @@ func calculate_movement(delta, _roll = self.roll):
 				_roll = -1
 			else: 
 					_roll = 0 # no less than frame turning
-	var rot = pce.r_rate * _roll * delta if pce.r_rate > 0.0 else 0.0
+	var r_rate = pce.r_rate
+	var rot = r_rate * _roll * delta if pce.r_rate > 0.0 else 0.0
 	var move = speed*delta if max_fuel < 0 else min(fuel, speed*delta) 
 	var orbit_radius = calc_orbit_radius(_roll) if _roll != 0 else -1
 	if (speed != 0 and orbit_radius != -1 and orbit_radius <= 10000):
