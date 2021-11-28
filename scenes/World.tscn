@@ -1,17 +1,19 @@
-[gd_scene load_steps=17 format=3 uid="uid://cdv3maktutvnq"]
+[gd_scene load_steps=19 format=3 uid="uid://cdv3maktutvnq"]
 
 [ext_resource type="Script" path="res://scripts/FollowPlayerCamera.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/FreeCamera.gd" id="2"]
 [ext_resource type="Script" path="res://scripts/World.gd" id="3"]
 [ext_resource type="PackedScene" uid="uid://cq5p8uil717wb" path="res://scenes/Plane.tscn" id="4"]
 [ext_resource type="PackedScene" uid="uid://d0bb4rhq3ak6t" path="res://scenes/Gun.tscn" id="5"]
-[ext_resource type="Texture2D" uid="uid://ph2hk5j62t5x" path="res://resources/burano.png" id="6"]
-[ext_resource type="Texture2D" uid="uid://b4vgp38v81tue" path="res://resources/gui/energy_bar_bg.png" id="6_1eth7"]
+[ext_resource type="Texture2D" uid="uid://bj6rpf1csgor7" path="res://resources/kenney_pixelshmup/Ships/ship_0000.png" id="5_7esg7"]
+[ext_resource type="Texture2D" uid="uid://cdx6fdwgy0j5d" path="res://resources/burano.png" id="6"]
+[ext_resource type="Texture2D" uid="uid://w8lfdwpfaw8e" path="res://resources/gui/energy_bar_bg.png" id="6_1eth7"]
 [ext_resource type="Script" path="res://scripts/Bars.gd" id="6_onlvc"]
+[ext_resource type="Texture2D" uid="uid://bf3c6m6d8xj7" path="res://resources/kenney_pixelshmup/Ships/ship_0001.png" id="6_reafk"]
 [ext_resource type="Shader" path="res://scripts/fog.gdshader" id="7_tj8av"]
-[ext_resource type="Texture2D" uid="uid://dmgc7gkhvrjqt" path="res://resources/gui/energy_bar_green.png" id="7_x0y7u"]
-[ext_resource type="Texture2D" uid="uid://c5yurt346j5jn" path="res://resources/gui/energy_bar_azure.png" id="8_75t2l"]
-[ext_resource type="Texture2D" uid="uid://cdivsddegebou" path="res://resources/gui/energy_bar_brown.png" id="9_4pcll"]
+[ext_resource type="Texture2D" uid="uid://d3c33dljuk6t2" path="res://resources/gui/energy_bar_green.png" id="7_x0y7u"]
+[ext_resource type="Texture2D" uid="uid://lacd8xnhd2fr" path="res://resources/gui/energy_bar_azure.png" id="8_75t2l"]
+[ext_resource type="Texture2D" uid="uid://s1n5mxk2wtfu" path="res://resources/gui/energy_bar_brown.png" id="9_4pcll"]
 [ext_resource type="Script" path="res://scripts/Fog.gd" id="9_ogm7a"]
 
 [sub_resource type="StyleBoxEmpty" id="1"]
@@ -40,6 +42,29 @@ _power_curve = [[0, -1.0], [250, 4.0], [500, 3.0], [1000, 0.2]]
 script = ExtResource( "1" )
 
 [node name="Gun" parent="Plane" instance=ExtResource( "5" )]
+
+[node name="Sprite2D" type="Sprite2D" parent="Plane"]
+rotation = 1.5708
+scale = Vector2(3, 3)
+texture = ExtResource( "5_7esg7" )
+script = null
+
+[node name="Plane2" parent="." instance=ExtResource( "4" )]
+position = Vector2(200, 0)
+skew = 4.37114e-08
+team = 1
+controller = 1
+collision_tags = []
+target_collision_tags = []
+collision_line_color = Color(0, 0.146317, 1, 1)
+_power_curve = [[0, -1.0], [250, 4.0], [500, 3.0], [1000, 0.2]]
+speed = 500
+
+[node name="Sprite2D" type="Sprite2D" parent="Plane2"]
+rotation = 1.5708
+scale = Vector2(3, 3)
+texture = ExtResource( "6_reafk" )
+script = null
 
 [node name="FreeCamera" type="Camera2D" parent="."]
 skew = 4.37114e-08
@@ -196,10 +221,10 @@ script = null
 
 [node name="ColorRect" type="ColorRect" parent="Background"]
 show_behind_parent = true
-offset_left = -8623.0
-offset_top = -9055.0
-offset_right = 11377.0
-offset_bottom = 10945.0
+offset_left = -8541.0
+offset_top = -9063.0
+offset_right = 11459.0
+offset_bottom = 10937.0
 color = Color(0.6, 0.6, 0.6, 1)
 script = null
 __meta__ = {

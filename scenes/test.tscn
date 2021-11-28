@@ -1,9 +1,9 @@
 [gd_scene load_steps=5 format=3 uid="uid://dp5ewu1llko8p"]
 
-[ext_resource type="Texture2D" uid="uid://b4vgp38v81tue" path="res://resources/gui/energy_bar_bg.png" id="1_1qvva"]
-[ext_resource type="Texture2D" uid="uid://bdv3ncw3fwp5t" path="res://resources/gui/energy_bar_fill.png" id="2_rmgck"]
-[ext_resource type="Texture2D" uid="uid://crvg85m5atccl" path="res://resources/gui/lifebar_bg.png" id="3_oshdp"]
-[ext_resource type="Texture2D" uid="uid://bnyqyldobxn2s" path="res://resources/gui/lifebar_fill.png" id="4_s6vot"]
+[ext_resource type="Texture2D" uid="uid://w8lfdwpfaw8e" path="res://resources/gui/energy_bar_bg.png" id="1_1qvva"]
+[ext_resource type="Texture2D" uid="uid://bpdl3r0owkev2" path="res://resources/gui/energy_bar_fill.png" id="2_rmgck"]
+[ext_resource type="Texture2D" uid="uid://dwe58wovrfsbo" path="res://resources/gui/lifebar_bg.png" id="3_oshdp"]
+[ext_resource type="Texture2D" uid="uid://vwgjceiligsj" path="res://resources/gui/lifebar_fill.png" id="4_s6vot"]
 
 [node name="Node2D" type="Node2D"]
 script = null

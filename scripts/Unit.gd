@@ -50,7 +50,7 @@ var collision_poly_color = PackedColorArray([_collision_poly_color])
 @export var orbit_size =  0
 @export var orbit_color = Color.GRAY
 @onready var collision_draw_points = $CollisionPolygon2D.polygon
-@export var draw_collision = true
+#@export var draw_collision = true
 @export var draw_explosion_prediction = false
 @export var explosion_prediction_ring_color = Color.BLUE
 @export var explosion_prediction_circle_color = Color(0, 0, 1, 0.25)
@@ -58,7 +58,8 @@ var collision_poly_color = PackedColorArray([_collision_poly_color])
 
 @export var acceleration = 100
 @export var deceleration = 100
-@export var effective_range = -1.0
+@export var max_fuel = -1.0
+@onready var fuel = max_fuel
 
 @export var max_health = -1
 @onready var health = max_health
@@ -80,7 +81,6 @@ var power_curve = []
 var pce : PCE # current speed and turn data
 @export var speed = 0
 
-@onready var remaining_range : float = effective_range
 var course_altered = false
 
 
@@ -188,10 +188,10 @@ func _physics_process(delta):
 	
 	update_tracked_enemies(delta)
 	
-	if(effective_range >= 0):
-		remaining_range = remaining_range - min(speed*delta, remaining_range)
-		assert(remaining_range >= 0, "remaining range is less than 0")
-		if remaining_range == 0 or (targets_in_explosion_range().size() > 0 and auto_detonate):
+	if(max_fuel >= 0):
+		fuel = fuel - min(speed*delta, fuel)
+		assert(fuel >= 0, "remaining range is less than 0")
+		if fuel == 0 or (targets_in_explosion_range().size() > 0 and auto_detonate):
 			die(auto_detonate)
 			return
 	
@@ -222,7 +222,8 @@ func is_visible_by_team(vision_team):
 func _draw():
 	if not is_visible_by_team(G.client_vision_team):
 		return
-	if(draw_collision and collision_draw_points.size() > 0):
+#	if(draw_collision and collision_draw_points.size() > 0):
+	if(false):
 		var to_draw = collision_draw_points + PackedVector2Array([collision_draw_points[0]])
 		draw_polyline(to_draw, collision_line_color, collision_line_width)
 		draw_polygon(to_draw, collision_poly_color)
@@ -237,10 +238,10 @@ func _draw():
 	if(roll in [G.Roll.LEFT, G.Roll.RIGHT] and pce.r_radius > 0 and orbit_size > 0):
 		draw_circle(get_orbit(G.roll_to_int(roll)), orbit_size, orbit_color)
 	
-	if(draw_explosion_prediction and (not dying) and (speed != 0) and (effective_range > 0.0)):
-			var explosion_prediction_pos = to_local(calculate_movement(remaining_range/speed)[0])
+	if(draw_explosion_prediction and (not dying) and (speed != 0) and (max_fuel > 0.0)):
+			var explosion_prediction_pos = to_local(calculate_movement(fuel/speed)[0])
 			var max_radius = $ExplosionArea/Collision.shape.radius
-			var mult = 1.0 - (remaining_range / effective_range)
+			var mult = 1.0 - (fuel / max_fuel)
 			var radius = max_radius * mult
 			if(radius > 0.0):
 				draw_circle(explosion_prediction_pos, radius,
@@ -378,7 +379,7 @@ func chance_to_see(enemy, delta):
 # used for calculating circular movement and not just prediction for the user
 # list of locals: speed, global_position
 # list of vars: delta, roll
-# list of var-derived: remaining_range, orbit_radius, orbit
+# list of var-derived: fuel, orbit_radius, orbit
 # returns [final global position, rotation]
 func calculate_movement(delta, _roll = self.roll):
 	if _roll == G.Roll.LEFT:
@@ -399,7 +400,7 @@ func calculate_movement(delta, _roll = self.roll):
 			else: 
 					_roll = 0 # no less than frame turning
 	var rot = pce.r_rate * _roll * delta if pce.r_rate > 0.0 else 0.0
-	var move = speed*delta if effective_range < 0 else min(remaining_range, speed*delta) 
+	var move = speed*delta if max_fuel < 0 else min(fuel, speed*delta) 
 	var orbit_radius = calc_orbit_radius(_roll) if _roll != 0 else -1
 	if (speed != 0 and orbit_radius != -1 and orbit_radius <= 10000):
 		var orbit = to_global(get_orbit(_roll))

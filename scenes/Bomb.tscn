@@ -1,8 +1,8 @@
 [gd_scene load_steps=71 format=3 uid="uid://u5twr0avaup4"]
 
 [ext_resource type="PackedScene" uid="uid://cq5p8uil717wb" path="res://scenes/Plane.tscn" id="1_uw573"]
-[ext_resource type="Texture2D" uid="uid://bqu2lj6ehhnkv" path="res://resources/explosion/spritesheet.png" id="2_e54jm"]
-[ext_resource type="Texture2D" uid="uid://dgivrin6x2dkt" path="res://resources/pixil-frame-0.png" id="3_v07fo"]
+[ext_resource type="Texture2D" uid="uid://cqecnso386spg" path="res://resources/explosion/spritesheet.png" id="2_e54jm"]
+[ext_resource type="Texture2D" uid="uid://bg287lfnsouw7" path="res://resources/pixil-frame-0.png" id="3_v07fo"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_bdf8u"]
 atlas = ExtResource( "2_e54jm" )
@@ -277,17 +277,15 @@ animations = [{
 }]
 
 [node name="Bomb" instance=ExtResource( "1_uw573" )]
-controller = 1
+controller = 1002
 collision_tags = []
 target_collision_tags = []
 collision_line_width = 2.0
 draw_explosion_prediction = true
 explosion_prediction_ring_width = 5.0
-effective_range = 500.0
 explosion_radius = 100
 _power_curve = [[0, -1.0], [250, 4.0], [500, 3.0], [1000, 0.2]]
 speed = 100
-radar_range = 0.0
 
 [node name="CollisionPolygon2D" parent="." index="0"]
 polygon = PackedVector2Array(-25, 50, -25, -50, 25, 0)

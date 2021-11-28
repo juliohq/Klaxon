@@ -31,6 +31,13 @@ Bombs flash briefly when spawned, it is suspected this has to do with the explos
 
 Prerequisite for a vertical sidebar UI is probably having the camera centered on the remaining portion of the screen.
 
+New ideas:
+Radar just rotates slowly, no need to shutdown to move. Can determine arc size vs focus as well.
+Missiles may have independent vision systems; they don't spot for allies nor do allies spot for them.
+Some player-only vision could be in pings, which update on a cool radar refresh rate, 
+	do not show what the spotted target is, and targeting AI won't use it.
+Targeting classes in addition to ammo classes, to allow for anti-radar dmg.
+
 Interference increases if you don't cap your r_rate or the enemy jams you (directional radar only).
 	It regenerates at a rate linearly going from double to single at 0 and full.
 	It affects radar range, enemy radar range reduction, jam range, jam strength, multiplicatively.
