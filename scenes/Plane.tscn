@@ -16,9 +16,9 @@ acceleration = 200
 deceleration = 200
 _power_curve = [[0, -1.0], [250, 4.0], [500, 3.0], [1000, 0.2]]
 radar_range = 1000.0
+visual_range = 100.0
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
-visible = false
 polygon = PackedVector2Array(-50, 50, -50, -50, 50, 0)
 script = null
 
@@ -32,17 +32,15 @@ shape = SubResource( "1" )
 script = null
 
 [node name="Masks" type="Node2D" parent="."]
+show_behind_parent = true
 z_index = -1
 script = null
 
-[node name="Aura" type="TextureRect" parent="Masks"]
-show_behind_parent = true
-offset_left = -512.0
-offset_top = -512.0
-offset_right = 512.0
-offset_bottom = 512.0
+[node name="VisualRange" type="PointLight2D" parent="Masks"]
+skew = 4.37114e-08
+color = Color(0.784314, 0.784314, 0.784314, 1)
+blend_mode = 2
+range_layer_min = -100
+range_item_cull_mask = 2
 texture = ExtResource( "2_0tfq5" )
 script = null
-__meta__ = {
-"_edit_use_anchors_": false
-}

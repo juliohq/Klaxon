@@ -1,9 +1,8 @@
 shader_type canvas_item;
 
-uniform vec2 unit_positions[1024]; // due to an engine bug, uniform arrays must be declared before other uniforms
+uniform vec2 unit_positions[1024];
 uniform float unit_ranges[1024];
 uniform int array_length = 0;
-uniform bool discard_all = true;
 
 
 
@@ -17,18 +16,14 @@ void vertex(){
 
 void fragment(){
 
-	if(discard_all){
-		discard;
-	}else{
-		bool skip = false;
-		vec2 zero = vec2(0,0);
-		for(int i = 0; i < array_length && !skip; i += 1){
-			if(length(world_position - unit_positions[i]) <= unit_ranges[i]){
-				skip = true;
-			}
-		}
-		if(skip){
+	bool skip = false;
+	vec2 zero = vec2(0,0);
+	for(int i = 0; i < array_length && !skip; i += 1){
+		if(distance(world_position, unit_positions[i]) <= unit_ranges[i]){
 			discard;
 		}
+	}
+	if(skip){
+		discard;
 	}
 }

@@ -91,25 +91,27 @@ var trail = []
 
 @export var max_range_detect_time = 10 # scales linearly to 0 at half range
 @export var radar_range : float = 0.0
-@export var visual_range : float = 0.0
+@export var visual_range : float = 0.0 # instant detection
 @onready var higher_range : float = max(radar_range, visual_range)
 @export var enemy_radar_flat_reduction = 0.0
-@export var enemy_visual_percent_reduction = 0.0
 var tracked_enemies = []
 var tracking_enemies = [] # enemies that are tracking us
 @export var is_decoy = false # always visible, and instantly destroyed when detected
 
 var evasive_action = true
 @export var evasive_r_rate_cap = -1.0
-# var _power_curve_no_interference # is this possible? since pces scale linearly by r_rate / speed
-# export var interference_time = 30.0
-# export var interference_safe_point = 0.75
-# export var jam_strength = 0.0 # enemy interference per second, if directinoal
-# export var jam_range = 500
-# var interference = 100.0
-#
-# export var radar_direction_change_time = 5.0
-# export var radar_direction_multiplier = 1.25
+@export var max_ewar = 30.0 # in seconds of evasive action
+@onready var ewar = max_ewar
+const ewar_regen_mult = 1.0
+#const min_ewar_mult = 0.25 # percent multiplier to radar range / reduction, jam range / strength
+#@export var offensive_jam_strength = 0.0 # ewar loss per second
+#@export var offensive_jam_range = 500
+#@export var defensive_jam_strength = 50 # idk?
+#@export var radar_turn_time = 5.0
+#@export var radar_arc_time = 5.0
+var radar_rot = 0 # in radians, positive
+
+const visual_range_base_radius = 256
 
 
 var is_ammo # set on ready
@@ -146,6 +148,7 @@ func _ready():
 		assert(get_parent().get_parent().team == team, "A gun fires a projectile of a different team.")
 	for group in auto_groups:
 		add_to_group(group)
+	$Masks/VisualRange.texture_scale = visual_range / visual_range_base_radius
 
 func _physics_process(delta):
 	match(controller):
@@ -198,6 +201,10 @@ func _physics_process(delta):
 			assert(_target != null, "Could not find player on an enemy team.")
 			roll = G.Roll.GUIDED
 	
+	if(evasive_action):
+		ewar = max(ewar - delta, 0)
+	else:
+		ewar = min(ewar + delta * ewar_regen_mult, max_ewar)
 	
 	var move = calculate_movement(delta)
 		
@@ -221,7 +228,6 @@ func _physics_process(delta):
 	
 	if(controller == Controller.PLAYER):
 		var time_string = "none" if pce.r_time < 0 else "%.1f" % pce.r_time
-		pass
 		$"../UI/BottomText".text = \
 			("speed: %.0f time: %s radius: %.0f, deg/sec: %.0f%s" % \
 			[speed, time_string, pce.r_radius, rad2deg(pce.r_rate), ", E" if evasive_action else ""])	
@@ -370,31 +376,22 @@ func update_tracked_enemies(delta):
 
 func chance_to_see(enemy, delta):
 	var dist = enemy.global_position.distance_to(global_position)
-	
-	var visual = visual_range * (1 - (enemy.enemy_visual_percent_reduction/100))
-	var v_insta = visual / 2 # instant detection range
-	var visual_chance
-	if (visual < dist):
-		visual_chance = 0.0
-	if(v_insta >= dist):
-		visual_chance = 1.0
-	else:
-		visual_chance =  G.mean_time_to_chance(G.max_mean_detection_time * (dist / v_insta), delta)
+
+	if (dist <= visual_range):
+		return 1.0
 	
 	var radar = radar_range - enemy.enemy_radar_flat_reduction
-	var r_insta = radar / 2 # instant detection range
 	
 	var radar_chance
-	if (radar < dist):
+	if (dist > radar):
 		radar_chance = 0.0
-	if(r_insta >= dist):
+	elif(dist <= radar/2):
 		radar_chance = 1.0
 	else:
-		radar_chance =  G.mean_time_to_chance(G.max_mean_detection_time * (dist / r_insta), delta)
+		var time = G.max_mean_detection_time * ((dist - radar/2) / (radar/2))
+		radar_chance =  G.mean_time_to_chance(time, delta)
 	
-#	if max(visual_chance, radar_chance) > 0:
-#		print("%s, %s, %s, %s" % [dist/v_insta if v_insta != 0 else "??", dist/r_insta if r_insta != 0 else "??", visual_chance, radar_chance])
-	return max(visual_chance, radar_chance)
+	return radar_chance
 	
 
 # used for calculating circular movement and not just prediction for the user

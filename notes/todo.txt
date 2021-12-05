@@ -29,9 +29,9 @@ Set plane render priority to -1.
 Bombs flash briefly when spawned, it is suspected this has to do with the explosion prediction
 ✔️
 
-Prerequisite for a vertical sidebar UI is probably having the camera centered on the remaining portion of the screen.
 
 New ideas:
+Aura represents visual range which is "hard" detection barring clouds.
 Radar just rotates slowly, no need to shutdown to move. Can determine arc size vs focus as well.
 Missiles may have independent vision systems; they don't spot for allies nor do allies spot for them.
 Some player-only vision could be in pings, which update on a cool radar refresh rate, 
@@ -45,8 +45,27 @@ Interference increases if you don't cap your r_rate or the enemy jams you (direc
 Can direct radar, taking a few seconds to boost in 90 degree arc, at cost to own.
 Interference (now called EW) regens at 1-2x. 0% EW = 0% radar.
 Detection/jam pow is normal up to 50%, then scaling to double that.
+Wider angle is more defensive jamming, less offensive jamming.
 
-power curve displayer
+HEAR HEAR: 
+All vision auras shall be done using a shader similar to the fog shader attached to the background.
+This shader will set the COLOR to a fixed value if not in fog of war, but adjust the alpha depending on detection strength.
+It will ignore jam strength, cuz that's always the same as detection strength (make it so!), except for in visual range where you probably don't care.
+Notably this will require iterating through each plane to find the one with the greatest detection strength for this pixel.
+
+HEAR HEAR 2:
+The big question rn is what should extending the radar range do? Reduce the arc surely, but also reduce/increase offensive/defensive jamming?
+Let's say it reduces neither, but only affects the range of offensive AND RADAR, which tapers off in strength anyway.
+Unfortunately, directional radar would likely mean reworking the fog shader into ssomething rather ugly. 
+Also radar strength is, uh, trinary.
+
+HEAR HEAR 3:
+Instead of the complex variables we have now, there will merely be detection strength, which determines radar strength and distance.
+This will be rendered in a sort of egg-shape.
+There will be no instant radar detection. Instead there will be a reasonable base and max time.
+There will also need to be a tracking indicator so players know when their targets are almost out of range. 
+I suggest a crosshair with variable length lines, when the lines are no more and only the circle remains the lock is lost.
+
 
 
 Fuel goes down based on distance travelled. Its consumption is doubled if above a certain speed, as a binary thing for the sake of player clarity.
@@ -56,3 +75,7 @@ Lifetimes of non-fuze missiles are generally replaced with fuel/decel.
 AA guns need to fire predictively, have some level of inaccuracy, and in the case of flak, adjust their lifetimes accordingly.
 
 Having units that move exactly the same as another unit but rotate independently could be a cool way to implement turrets.
+
+power curve displayer
+
+Prerequisite for a vertical sidebar UI is probably having the camera centered on the remaining portion of the screen.

@@ -11,3 +11,4 @@ controller = 1001
 collision_tags = []
 target_collision_tags = []
 _power_curve = [[0, -1.0], [250, 4.0], [500, 3.0], [1000, 0.2]]
+visual_range = 0.0

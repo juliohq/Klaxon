@@ -1,6 +1,7 @@
+CanvasLayer
+PointLight2D
 Sprite2D
 Control
-CanvasLayer
 Node2D
 RichTextLabel
 TextureProgressBar

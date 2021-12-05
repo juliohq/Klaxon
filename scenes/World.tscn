@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://cdv3maktutvnq"]
+[gd_scene load_steps=19 format=3 uid="uid://cicnpcq7sdtp"]
 
 [ext_resource type="Script" path="res://scripts/FollowPlayerCamera.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/FreeCamera.gd" id="2"]
@@ -10,7 +10,7 @@
 [ext_resource type="Texture2D" uid="uid://w8lfdwpfaw8e" path="res://resources/gui/energy_bar_bg.png" id="6_1eth7"]
 [ext_resource type="Script" path="res://scripts/Bars.gd" id="6_onlvc"]
 [ext_resource type="Texture2D" uid="uid://bf3c6m6d8xj7" path="res://resources/kenney_pixelshmup/Ships/ship_0001.png" id="6_reafk"]
-[ext_resource type="Shader" path="res://scripts/fog.gdshader" id="7_tj8av"]
+[ext_resource type="Shader" path="res://scripts/Fog.gdshader" id="7_tj8av"]
 [ext_resource type="Texture2D" uid="uid://d3c33dljuk6t2" path="res://resources/gui/energy_bar_green.png" id="7_x0y7u"]
 [ext_resource type="Texture2D" uid="uid://lacd8xnhd2fr" path="res://resources/gui/energy_bar_azure.png" id="8_75t2l"]
 [ext_resource type="Texture2D" uid="uid://s1n5mxk2wtfu" path="res://resources/gui/energy_bar_brown.png" id="9_4pcll"]
@@ -25,7 +25,6 @@ shader = ExtResource( "7_tj8av" )
 shader_param/unit_positions = null
 shader_param/unit_ranges = PackedFloat32Array()
 shader_param/array_length = null
-shader_param/discard_all = false
 shader_param/global_transform = null
 
 [node name="World" type="Node2D"]
@@ -139,6 +138,7 @@ offset_left = 30.0
 offset_right = 269.0
 offset_bottom = 39.0
 rect_scale = Vector2(0.5, 0.5)
+step = 0.0
 value = 50.0
 texture_under = ExtResource( "6_1eth7" )
 texture_progress = ExtResource( "7_x0y7u" )
@@ -172,6 +172,7 @@ offset_left = 30.0
 offset_right = 269.0
 offset_bottom = 39.0
 rect_scale = Vector2(0.5, 0.5)
+step = 0.0
 value = 30.0
 texture_under = ExtResource( "6_1eth7" )
 texture_progress = ExtResource( "8_75t2l" )
@@ -208,6 +209,7 @@ offset_right = 246.0
 offset_bottom = 80.0
 rect_rotation = -1.5708
 rect_scale = Vector2(0.16, 0.5)
+step = 0.0
 value = 80.0
 texture_under = ExtResource( "6_1eth7" )
 texture_progress = ExtResource( "9_4pcll" )
@@ -218,10 +220,12 @@ __meta__ = {
 
 [node name="Background" type="CanvasLayer" parent="."]
 layer = -100
+follow_viewport_enable = true
 script = null
 
 [node name="ColorRect" type="ColorRect" parent="Background"]
 show_behind_parent = true
+light_mask = 2
 offset_left = -8709.0
 offset_top = -9142.0
 offset_right = 11291.0
