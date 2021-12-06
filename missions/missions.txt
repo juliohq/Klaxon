@@ -1,0 +1,1 @@
+All missions must be placed in this directory in order to be loaded in the game
