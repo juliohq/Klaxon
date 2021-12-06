@@ -5,6 +5,7 @@ extends CharacterBody2D
 var G 
 const PCE = preload("nodeless/PowerCurveEntry.gd")
 
+##testasdfasdfsd
 @export var team = 0
 
 enum Controller {PLAYER = 0, DUMB = 1, PURSUE_NEAREST = 1001, PURSUE_PLAYER = 1002}
@@ -89,29 +90,23 @@ var course_altered = false
 @onready var roll = G.Roll.STRAIGHT
 var trail = []
 
-@export var max_range_detect_time = 10 # scales linearly to 0 at half range
-@export var radar_range : float = 0.0
-@export var visual_range : float = 0.0 # instant detection
-@onready var higher_range : float = max(radar_range, visual_range)
-@export var enemy_radar_flat_reduction = 0.0
+
+
 var tracked_enemies = []
 var tracking_enemies = [] # enemies that are tracking us
 @export var is_decoy = false # always visible, and instantly destroyed when detected
 
+
+
+
+@export var visual_range : float = 0.0 # instant detection
 var evasive_action = true
 @export var evasive_r_rate_cap = -1.0
 @export var max_ewar = 30.0 # in seconds of evasive action
 @onready var ewar = max_ewar
-const ewar_regen_mult = 1.0
-#const min_ewar_mult = 0.25 # percent multiplier to radar range / reduction, jam range / strength
-#@export var offensive_jam_strength = 0.0 # ewar loss per second
-#@export var offensive_jam_range = 500
-#@export var defensive_jam_strength = 50 # idk?
-#@export var radar_turn_time = 5.0
-#@export var radar_arc_time = 5.0
-var radar_rot = 0 # in radians, positive
-
-const visual_range_base_radius = 256
+@export var radar_strength = 2.0 # >= 1 is full strength, but higher values help with falloff
+#@export var offensive_jam_strength = 1 # in ewar loss per second, times radar_strength percentage if <100%
+#@export var defensive_jam_strength = 10 # in flat ewar negation
 
 
 var is_ammo # set on ready
@@ -148,7 +143,6 @@ func _ready():
 		assert(get_parent().get_parent().team == team, "A gun fires a projectile of a different team.")
 	for group in auto_groups:
 		add_to_group(group)
-	$Masks/VisualRange.texture_scale = visual_range / visual_range_base_radius
 
 func _physics_process(delta):
 	match(controller):
@@ -204,7 +198,7 @@ func _physics_process(delta):
 	if(evasive_action):
 		ewar = max(ewar - delta, 0)
 	else:
-		ewar = min(ewar + delta * ewar_regen_mult, max_ewar)
+		ewar = min(ewar + delta * G.ewar_regen_mult, max_ewar)
 	
 	var move = calculate_movement(delta)
 		
@@ -380,18 +374,8 @@ func chance_to_see(enemy, delta):
 	if (dist <= visual_range):
 		return 1.0
 	
-	var radar = radar_range - enemy.enemy_radar_flat_reduction
-	
-	var radar_chance
-	if (dist > radar):
-		radar_chance = 0.0
-	elif(dist <= radar/2):
-		radar_chance = 1.0
-	else:
-		var time = G.max_mean_detection_time * ((dist - radar/2) / (radar/2))
-		radar_chance =  G.mean_time_to_chance(time, delta)
-	
-	return radar_chance
+	var strength = clamp((radar_strength - (dist * G.radar_falloff)), 0.0, 1.0)
+	return G.MTTH_to_chance(lerp(G.max_radar_MTTH, G.min_radar_MTTH, strength), delta)
 	
 
 # used for calculating circular movement and not just prediction for the user

@@ -1,12 +1,16 @@
 extends Node
 
+const ewar_regen_mult = 1.0
+const radar_falloff = 0.002 # in loss per pixel
+const max_radar_MTTH = 30
+const min_radar_MTTH = 5
+
 @onready var pfps = ProjectSettings.get_setting("physics/common/physics_fps")
 @onready var pdelta = 1.0/pfps
 var player_camera = null
 var free_camera = null
 var current_camera = null
 var players = [null, null]
-var max_mean_detection_time = 1
 enum Roll {LEFT = 0, STRAIGHT = 1, RIGHT = 2, GUIDED = 3}
 func roll_to_int(roll):
 	assert(roll in [Roll.LEFT, Roll.STRAIGHT, Roll.RIGHT])
@@ -33,7 +37,8 @@ func get_visible_units(team = client_vision_team):
 						ret.append(enemy)
 	return ret
 
-func mean_time_to_chance(time, delta):
+# MTTH = Mean Time To Happen, a term from Paradox.
+func MTTH_to_chance(time, delta):
 	return 1 / (time / delta)
 
 func _ready():

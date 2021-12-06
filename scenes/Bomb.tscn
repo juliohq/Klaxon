@@ -277,14 +277,12 @@ animations = [{
 }]
 
 [node name="Bomb" instance=ExtResource( "1_uw573" )]
-controller = 1002
-collision_tags = []
-target_collision_tags = []
+controller = 1
 collision_line_width = 2.0
 draw_explosion_prediction = true
 explosion_prediction_ring_width = 5.0
+max_fuel = 50.0
 explosion_radius = 100
-_power_curve = [[0, -1.0], [250, 4.0], [500, 3.0], [1000, 0.2]]
 speed = 100
 
 [node name="CollisionPolygon2D" parent="." index="0"]
@@ -293,12 +291,10 @@ polygon = PackedVector2Array(-25, 50, -25, -50, 25, 0)
 [node name="DeathAnim" type="AnimatedSprite2D" parent="." index="3"]
 visible = false
 frames = SubResource( "SpriteFrames_1psb1" )
-script = null
 
 [node name="Sprite2D" type="Sprite2D" parent="." index="4"]
 position = Vector2(-10, 0)
 rotation = 1.5708
 texture = ExtResource( "3_v07fo" )
-script = null
 
 [connection signal="animation_finished" from="DeathAnim" to="." method="_on_DeathAnim_animation_finished"]

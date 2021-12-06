@@ -6,7 +6,6 @@
 [ext_resource type="Texture2D" uid="uid://vwgjceiligsj" path="res://resources/gui/lifebar_fill.png" id="4_s6vot"]
 
 [node name="Node2D" type="Node2D"]
-script = null
 
 [node name="TextureProgressBar" type="TextureProgressBar" parent="."]
 offset_left = 5.0
@@ -16,7 +15,6 @@ offset_bottom = 88.0
 value = 50.0
 texture_under = ExtResource( "1_1qvva" )
 texture_progress = ExtResource( "2_rmgck" )
-script = null
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -29,7 +27,6 @@ offset_bottom = 125.0
 value = 50.0
 texture_under = ExtResource( "3_oshdp" )
 texture_progress = ExtResource( "4_s6vot" )
-script = null
 __meta__ = {
 "_edit_use_anchors_": false
 }
