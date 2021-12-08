@@ -31,6 +31,5 @@ func _process(_delta):
 	material.set_shader_param("see_all", false)
 	material.set_shader_param ("positions", positions)
 	material.set_shader_param ("radars", radars)
-	print(radars[0])
 	material.set_shader_param ("visuals", visuals)
 	material.set_shader_param("array_length", array_length)

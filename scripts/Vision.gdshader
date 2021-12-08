@@ -10,9 +10,10 @@ uniform int array_length = 0;
 uniform float radar_falloff = 0;
 
 
-uniform float visual_brightness = 0.5;  
-uniform float best_radar_brightness = 0.4; // must be lower than the above
-uniform float no_detection_brightness = 0.3; // must be lower than the above
+uniform float visual_brightness = 0.65;  
+uniform float brightest_radar = 0.6; // must be lower than the above
+uniform float darkest_radar = 0.4;  // must be lower than the above
+uniform float no_detection_brightness = 0.35; // must be lower than the above
 
 
 
@@ -37,9 +38,14 @@ void fragment(){
 				brightest = visual_brightness;
 			}else{
 				float strength = clamp((radars[i] - (dist * radar_falloff)), 0.0, 1.0);
-				brightest = min(brightest, mix(no_detection_brightness, best_radar_brightness, strength));
+				if(strength > 0.0){
+					brightest = max(brightest, mix(darkest_radar, brightest_radar, strength));
+				}
 			}
 		}
 	}
 	COLOR.rgb = vec3(brightest, brightest, brightest);
+//	float dist = distance(world_position, positions[0]);
+//	float strength = clamp((radars[0] - (dist * radar_falloff)), 0.0, 1.0);
+//	COLOR.r = min(visual_brightness, mix(no_detection_brightness, best_radar_brightness, strength));
 }

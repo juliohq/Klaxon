@@ -288,11 +288,11 @@ speed = 100
 [node name="CollisionPolygon2D" parent="." index="0"]
 polygon = PackedVector2Array(-25, 50, -25, -50, 25, 0)
 
-[node name="DeathAnim" type="AnimatedSprite2D" parent="." index="3"]
+[node name="DeathAnim" type="AnimatedSprite2D" parent="." index="2"]
 visible = false
 frames = SubResource( "SpriteFrames_1psb1" )
 
-[node name="Sprite2D" type="Sprite2D" parent="." index="4"]
+[node name="Sprite2D" type="Sprite2D" parent="." index="3"]
 position = Vector2(-10, 0)
 rotation = 1.5708
 texture = ExtResource( "3_v07fo" )
