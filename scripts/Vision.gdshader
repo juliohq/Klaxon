@@ -1,6 +1,6 @@
 shader_type canvas_item;
 
-uniform bool see_all = true;
+uniform bool see_all = false;
 
 uniform vec2 positions[1024];
 uniform float radars[1024]; // range = this/radar_falloff
@@ -27,25 +27,34 @@ void vertex(){
 }
 
 void fragment(){
-	float brightest = no_detection_brightness;
+	float strength = 0.0; // > 1.0 is visual, <=  0.0 is no_detection, else mix between darkest_radar and brightest_radar
 	if(see_all){
-		brightest = visual_brightness;
+		strength = 42.0;
 	}else{
 		vec2 zero = vec2(0,0);
-		for(int i = 0; i < array_length && brightest != visual_brightness; i += 1){
+		for(int i = 0; i < array_length && (strength < 1.0); i += 1){
 			float dist = distance(world_position, positions[i]);
 			if(dist <= visuals[i]){
-				brightest = visual_brightness;
+				strength = 42.0;
 			}else{
-				float strength = clamp((radars[i] - (dist * radar_falloff)), 0.0, 1.0);
-				if(strength > 0.0){
-					brightest = max(brightest, mix(darkest_radar, brightest_radar, strength));
+				float to_strength = clamp((radars[i] - (dist * radar_falloff)), 0.0, 1.0);
+				if(to_strength > 0.0){
+					strength = max(strength, to_strength);
 				}
 			}
 		}
 	}
-	COLOR.rgb = vec3(brightest, brightest, brightest);
-//	float dist = distance(world_position, positions[0]);
-//	float strength = clamp((radars[0] - (dist * radar_falloff)), 0.0, 1.0);
-//	COLOR.r = min(visual_brightness, mix(no_detection_brightness, best_radar_brightness, strength));
+	if(strength > 1.0){
+		COLOR.rgb = vec3(visual_brightness + 0.05, visual_brightness + 0.05, visual_brightness);
+	}else if(strength <= 0.0){
+		COLOR.rgb = vec3(no_detection_brightness, no_detection_brightness, no_detection_brightness);
+	}else{
+		float brightness = mix(darkest_radar, brightest_radar, strength);
+		if(strength >= 1.0){
+			COLOR.rgb = vec3(brightness + 0.06, brightness + 0.06, brightness +0.01);
+		}else{
+			COLOR.rgb = vec3(brightness, brightness, brightness);
+		}
+	}
+	
 }
