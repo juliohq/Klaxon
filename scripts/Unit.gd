@@ -391,16 +391,19 @@ func calculate_movement(delta, _roll = self.roll):
 	elif _roll == G.Roll.RIGHT:
 			_roll = 1
 	elif _roll == G.Roll.GUIDED:
-		if(pce.r_rate == 0):
-			roll = 0 # infinite turn time
+		if(_target == null):
+			_roll = 0
 		else:
-			_roll = get_angle_to(get_target_pos()) / (pce.r_rate * delta)
-			if _roll > 1: 
-				_roll = 1
-			elif _roll < -1: 
-				_roll = -1
-			else: 
-					_roll = 0 # no less than frame turning
+			if(pce.r_rate == 0):
+				roll = 0 # infinite turn time
+			else:
+				_roll = get_angle_to(get_target_pos()) / (pce.r_rate * delta)
+				if _roll > 1: 
+					_roll = 1
+				elif _roll < -1: 
+					_roll = -1
+				else: 
+						_roll = 0 # no less than frame turning
 	var r_rate = pce.r_rate
 	var rot = r_rate * _roll * delta if pce.r_rate > 0.0 else 0.0
 	var move = speed*delta if max_fuel < 0 else min(fuel, speed*delta) 

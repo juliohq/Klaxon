@@ -29,6 +29,9 @@ Set plane render priority to -1.
 Bombs flash briefly when spawned, it is suspected this has to do with the explosion prediction
 ✔️
 
+for some reason visual gets overwritten, pursue nearest breaks when there are no enemies
+✔️
+
 
 New ideas:
 Aura represents visual range which is "hard" detection barring clouds.
@@ -65,6 +68,13 @@ This will be rendered in a sort of egg-shape.
 There will be no instant radar detection. Instead there will be a reasonable base and max time.
 There will also need to be a tracking indicator so players know when their targets are almost out of range. 
 I suggest a crosshair with variable length lines, when the lines are no more and only the circle remains the lock is lost.
+
+HEAR HEAR 4:
+Gun randomized inaccuracy. Arc indicator crossing with vertical line showing splash radius, both centered on max range.
+Any-direction shooting guns, handled by simply rotating the enetity, though AI might be complex.
+Possible remote-controlled drones, 1 at a time only, main ship  will be in holding pattern until drone is destroyed, requires some notifications.
+Add ammo bar, guns can use ammo/fuel/ewar. They cannot damage it.
+
 
 
 
